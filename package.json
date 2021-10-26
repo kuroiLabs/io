@@ -33,8 +33,10 @@
     "ws": "^8.2.3"
   },
   "devDependencies": {
+    "@kuroi/syringe": "^1.0.4",
     "@types/express": "^4.17.13",
     "@types/node": "^16.11.6",
-    "@types/ws": "^8.2.0"
+    "@types/ws": "^8.2.0",
+    "http": "0.0.1-security"
   }
 }
