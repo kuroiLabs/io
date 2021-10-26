@@ -7,7 +7,7 @@ export abstract class Route implements IRoute {
 
   private static readonly ROOT = `*/api`
 
-  public static endpoints: Endpoint[] = []
+  public static _endpoints: Endpoint[] = []
 
   public router = express.Router()
 
@@ -18,7 +18,7 @@ export abstract class Route implements IRoute {
   constructor(_route: IRoute) {
     this.path = `${Route.ROOT}/${_route.path}` || ''
     this.guards = _route.guards || []
-    const _endpoints: Endpoint[] = Object.getPrototypeOf(this).constructor.endpoints
+    const _endpoints: Endpoint[] = Object.getPrototypeOf(this).constructor._endpoints
     this._configureEndpoints(_endpoints)
   }
 
