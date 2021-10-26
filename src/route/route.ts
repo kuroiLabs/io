@@ -30,13 +30,22 @@ export abstract class Route implements IRoute {
       ) || []
       // append route handler at end
       _handlers.push(_endpoint.handler.bind(this))
-      // this.router.get
       switch (_endpoint.method.toLowerCase()) {
-        case "get": this.router.get(_endpoint.path, ..._handlers)
-        case "patch": this.router.patch(_endpoint.path, ..._handlers)
-        case "post": this.router.post(_endpoint.path, ..._handlers)
-        case "put": this.router.put(_endpoint.path, ..._handlers)
-        case "delete": this.router.delete(_endpoint.path, ..._handlers)
+        case "get":
+          this.router.get(_endpoint.path, ..._handlers)
+          break
+        case "patch":
+          this.router.patch(_endpoint.path, ..._handlers)
+          break
+        case "post":
+          this.router.post(_endpoint.path, ..._handlers)
+          break
+        case "put":
+          this.router.put(_endpoint.path, ..._handlers)
+          break
+        case "delete":
+          this.router.delete(_endpoint.path, ..._handlers)
+          break
         default: throw new Error("Unknown method type \"" + _endpoint.method + "\"")
       }
     }
