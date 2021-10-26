@@ -1,0 +1,30 @@
+{
+  "name": "@kuroi/io",
+  "version": "0.0.1",
+  "description": "Node.js Typescript framework for server-side applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuroiLabs/io.git"
+  },
+  "keywords": [
+    "io",
+    "node",
+    "typescript",
+    "express",
+    "api",
+    "rest",
+    "ws",
+    "websocket",
+    "realtime"
+  ],
+  "author": "kuro <kuro@kuroi.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kuroiLabs/io/issues"
+  },
+  "homepage": "https://github.com/kuroiLabs/io#readme"
+}
