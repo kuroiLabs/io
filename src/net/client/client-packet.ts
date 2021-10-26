@@ -12,8 +12,8 @@ export class ClientPacket implements IPacket {
 
   private decoder = new TextDecoder()
 
-  constructor(buffer: ArrayBuffer) {
-    this.buffer = buffer
+  constructor(_buffer: ArrayBuffer) {
+    this.buffer = _buffer
   }
 
   public data(): ArrayBuffer {
