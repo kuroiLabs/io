@@ -37,27 +37,13 @@ export abstract class BaseWebClient implements IWebClient {
     try {
       if (this.beforeConnect)
         this.beforeConnect()
-  
       this.socket = new WebSocket(_url)
       this.socket.binaryType = "arraybuffer"
-
-      return new Observable<ClientPacket>((observer: Subscriber<any>) => {
-        
-        this.socket?.addEventListener("open", () => {
-          if (this.onConnect)
-            this.onConnect()
-          this.state = WebSocket.OPEN
-          this.socket?.addEventListener("message", event => {
-            observer.next(new ClientPacket(event.data))
-          })
-        })
-        
-        this.socket?.addEventListener("error", _error => {
-          if (this.onError)
-            this.onError(_error)
-          observer.error(_error)
-        })
-
+      return new Observable<ClientPacket>(_observer => {
+        if (this.socket) {
+          this._handleConnectionStream(this.socket, _observer)
+          this._handleConnectionErrors(this.socket, _observer)
+        }  
         return {
           unsubscribe: () => {
             this.socket?.close()
@@ -67,6 +53,25 @@ export abstract class BaseWebClient implements IWebClient {
     } catch (_err) {
       return throwError(() => _err)
     }
+  }
+
+  private _handleConnectionStream(_socket: WebSocket, _observer: Subscriber<ClientPacket>): void {
+    _socket.addEventListener("open", () => {
+      if (this.onConnect)
+        this.onConnect()
+      this.state = WebSocket.OPEN
+      this.socket?.addEventListener("message", event =>
+        _observer.next(new ClientPacket(event.data))
+      )
+    })
+  }
+
+  private _handleConnectionErrors(_socket: WebSocket, _observer: Subscriber<ClientPacket>): void {
+    _socket.addEventListener("error", _error => {
+      if (this.onError)
+        this.onError(_error)
+      _observer.error(_error)
+    })
   }
 
 }
