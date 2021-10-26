@@ -29,10 +29,12 @@
   "homepage": "https://github.com/kuroiLabs/io#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "rxjs": "^7.4.0"
+    "rxjs": "^7.4.0",
+    "ws": "^8.2.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
-    "@types/node": "^16.11.6"
+    "@types/node": "^16.11.6",
+    "@types/ws": "^8.2.0"
   }
 }
