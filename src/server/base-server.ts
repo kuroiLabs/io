@@ -5,15 +5,13 @@ import { Route } from '../route'
 
 export abstract class BaseServer {
 
-  public routes: Route[] = []
-
-  public guards: Guard[] = []
-
   public lobbies: ILobby[] = []
 
   constructor(
     public api: express.Express,
-    public port: number
+    public port: number,
+    public routes: Route[],
+    public guards: Guard[]
   ) {
 
   }
@@ -38,17 +36,13 @@ export abstract class BaseServer {
   }
 
   private configureRoutes(): void {
-    if (this.routes)
-      for (const route of this.routes)
-        this.api.use(route.path, route.router)
+    for (let i = 0; i < this.routes.length; i++)
+      this.api.use(this.routes[i].path, this.routes[i].router)
   }
 
   private configureGuards(): void {
-    if (this.guards) {
-      for (const _guard of this.guards)
-        if (_guard && _guard.handler)
-          this.api.use(_guard.handler)
-    }
+    for (let i = 0; i < this.guards.length; i++)
+      this.api.use(this.guards[i].handler)
   }
 
 }
