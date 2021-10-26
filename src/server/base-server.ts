@@ -45,4 +45,6 @@ export abstract class BaseServer {
       this.api.use(this.guards[i].handler)
   }
 
+  public abstract start(): void
+
 }
