@@ -7,7 +7,7 @@ export abstract class Route implements IRoute {
 
   private static readonly ROOT = `*/api`
 
-  public static _endpoints: Endpoint[] = []
+  public static endpoints: Endpoint[] = []
 
   public router = express.Router()
 
@@ -18,10 +18,11 @@ export abstract class Route implements IRoute {
   constructor(_route: IRoute) {
     this.path = `${Route.ROOT}/${_route.path}` || ''
     this.guards = _route.guards || []
+    const _endpoints: Endpoint[] = Object.getPrototypeOf(this).constructor.endpoints
+    this._configureEndpoints(_endpoints)
   }
 
-  protected configureEndpoints(_route: { _endpoints: Endpoint[] }): void {
-    const _endpoints = _route._endpoints
+  private _configureEndpoints(_endpoints: Endpoint[]): void {
     for (const _endpoint of _endpoints) {
       // front load guards/middleware
       const _handlers: express.RequestHandler[] = this.guards && this.guards.map(_guard =>
@@ -31,12 +32,12 @@ export abstract class Route implements IRoute {
       _handlers.push(_endpoint.handler.bind(this))
       // this.router.get
       switch (_endpoint.method.toLowerCase()) {
-        case 'get': this.router.get(_endpoint.path, ..._handlers)
-        case 'patch': this.router.patch(_endpoint.path, ..._handlers)
-        case 'post': this.router.post(_endpoint.path, ..._handlers)
-        case 'put': this.router.put(_endpoint.path, ..._handlers)
-        case 'delete': this.router.delete(_endpoint.path, ..._handlers)
-        default: throw new Error('Unknown method type "' + _endpoint.method + '"')
+        case "get": this.router.get(_endpoint.path, ..._handlers)
+        case "patch": this.router.patch(_endpoint.path, ..._handlers)
+        case "post": this.router.post(_endpoint.path, ..._handlers)
+        case "put": this.router.put(_endpoint.path, ..._handlers)
+        case "delete": this.router.delete(_endpoint.path, ..._handlers)
+        default: throw new Error("Unknown method type \"" + _endpoint.method + "\"")
       }
     }
   }
