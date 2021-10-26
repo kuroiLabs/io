@@ -15,9 +15,9 @@ export abstract class Route implements IRoute {
 
   public path: string
 
-  constructor(_route: IRoute) {
-    this.path = `${Route.ROOT}/${_route.path}` || ''
-    this.guards = _route.guards || []
+  constructor(path: string, guards?: Guard[]) {
+    this.path = `${Route.ROOT}/${path}` || ''
+    this.guards = guards || []
     const _endpoints: Endpoint[] = Object.getPrototypeOf(this).constructor._endpoints
     this._configureEndpoints(_endpoints)
   }
