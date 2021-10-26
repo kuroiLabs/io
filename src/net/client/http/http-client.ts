@@ -28,7 +28,7 @@ export class HttpClient implements IHttpClient {
   public put<T = any>(url: string, body: any, options?: IHttpOptions): Observable<T> {
     return new Observable<T>(_observer => {
       const _request: Request = new Request(url, {
-        method: "POST",
+        method: "PUT",
         credentials: options && options.credentials,
         body
       })
@@ -39,7 +39,7 @@ export class HttpClient implements IHttpClient {
   public delete<T = any>(url: string, options?: IHttpOptions): Observable<T> {
     return new Observable<T>(_observer => {
       const _request: Request = new Request(url, {
-        method: "POST",
+        method: "DELETE",
         credentials: options && options.credentials
       })
       this._processResponse(_request, _observer)
