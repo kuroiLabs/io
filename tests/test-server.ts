@@ -1,18 +1,19 @@
 import { Syringe } from "@kuroi/syringe"
-import http from "http"
 import express from "express"
+import http from "http"
 import { Route } from "../src/route"
 import { BaseServer } from "../src/server"
-import { TestGuard } from "./test-guard"
+import { EXPRESS, PORT } from "./test-api-tokens"
+import { TestRoute } from "./test-route"
 
 @Syringe.Injectable({
   scope: "global"
 })
 export class TestServer extends BaseServer {
   constructor(
-    api: express.Express,
-    port: number,
-    @Syringe.Inject(TestGuard) _testRoute: Route 
+    @Syringe.Inject(EXPRESS) api: express.Express,
+    @Syringe.Inject(PORT) port: number,
+    @Syringe.Inject(TestRoute) _testRoute: Route 
   ) {
     super(api, port, [_testRoute], [])
   }
