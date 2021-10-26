@@ -27,9 +27,8 @@ export abstract class BasePacketHandler {
       return
     const _callbacks: PacketHandlerCallback[] = this._events.get(_eventName) || []
     const _index: int = _callbacks.indexOf(_callback)
-    if (_index > -1) {
+    if (_index > -1)
       _callbacks.splice(_index, 1)
-    }
   }
 
   public emit(_packetId: byte, _clientId: int, _packet: IPacket, _clients?: ClientMap): void {
