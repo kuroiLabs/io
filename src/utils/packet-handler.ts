@@ -11,6 +11,10 @@ type PacketHandlerCallback = (
 
 export abstract class BasePacketHandler {
 
+  protected encoder: TextEncoder = new TextEncoder()
+
+  protected decoder: TextDecoder = new TextDecoder()
+
   private _events = new Map<string | int, PacketHandlerCallback[]>()
 
   public on(_packetId: byte, _callback: PacketHandlerCallback): void {
