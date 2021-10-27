@@ -1,13 +1,6 @@
-import WebSocket from "ws"
 import { IPacket } from "../net/packet.interface"
 
-type ClientMap = Map<int, WebSocket>
-
-type PacketHandlerCallback = (
-  _packet: IPacket,
-  _clientId?: int,
-  _clients?: ClientMap
-) => void
+type PacketHandlerCallback = (_packet: IPacket<any>, ..._args: any[]) => void
 
 export abstract class BasePacketHandler {
 
@@ -35,9 +28,9 @@ export abstract class BasePacketHandler {
       _callbacks.splice(_index, 1)
   }
 
-  public emit(_packetId: byte, _packet: IPacket, _clientId?: int, _clients?: ClientMap): void {
+  public emit(_packetId: byte, _packet: IPacket<any>, ..._args: any[]): void {
     const _callbacks: PacketHandlerCallback[] = this._events.get(_packetId) || []
-    _callbacks.forEach(_callback => _callback(_packet, _clientId, _clients))
+    _callbacks.forEach(_callback => _callback(_packet, ..._args))
   }
 
 } 
