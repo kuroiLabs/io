@@ -1,7 +1,7 @@
 import { Syringe } from "@kuroi/syringe"
 import { Request, Response } from "express"
-import { Get } from "../src/endpoint"
-import { Route } from "../src/route"
+import { Get } from "../../src/endpoint"
+import { Route } from "../../src/route"
 import { TestGuard } from "./test-guard"
 
 @Syringe.Injectable()
