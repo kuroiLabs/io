@@ -7,8 +7,8 @@
     "build": "shx rm -rf lib && tsc",
     "build:test:client": "cd tests/client && npm run build",
     "build:test:server": "cd tests/server && npm run build",
-    "test:client": "http-server tests/client/dist",
-    "test:server": "node tests/server/index.js"
+    "test:client:e2e": "npm run build:test:client && http-server tests/client/dist",
+    "test:server:e2e": "npm run build:test:server && node tests/server/index.js"
   },
   "repository": {
     "type": "git",
