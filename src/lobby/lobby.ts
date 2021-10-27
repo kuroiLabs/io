@@ -1,6 +1,5 @@
-import { Numeric } from '@kuroi/numeric'
+import { GeneratorService } from '@kuroi/numeric/generate'
 import WebSocket from 'ws'
-import { IPacket } from '../net'
 import { ServerPacket } from '../net/server'
 import { BasePacketHandler } from '../utils'
 import { ILobby } from './lobby.interface'
@@ -13,11 +12,7 @@ export interface Lobby {
   onLeave?(client: WebSocket, id: byte): void
 }
 
-type LobbyPacketHandlerCallback = (
-  packet: IPacket<Buffer>,
-  clientId: uint16,
-  clientMap: Map<uint32, WebSocket>
-) => void
+type LobbyPacketHandlerCallback = (packet: ServerPacket, clientId: uint16) => void
 
 export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback> implements ILobby {
 
@@ -33,9 +28,11 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
 
   public wss: WebSocket.Server
 
-  constructor(_lobby?: ILobby) {
+  private _generator: GeneratorService = new GeneratorService()
+
+  constructor(_lobby: ILobby) {
     super()
-    this.id = _lobby && _lobby.id || Numeric.generate.generateNumericId()
+    this.id = _lobby && _lobby.id 
     this.name = _lobby && _lobby.name || ''
     this.maxClients = _lobby && _lobby.maxClients || Lobby.DEFAULT_MAX_CLIENTS
     this.wss = new WebSocket.Server({ noServer: true })
@@ -71,7 +68,7 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
   private _handshake(_client: WebSocket): void {
     if (this.clients.size >= this.maxClients)
       return _client.close()
-    const _id: byte = Numeric.generate.generateNumericId()
+    const _id: byte = this._generator.generateNumericId()
     if (this.onHandshake)
       this.onHandshake(_client, _id)
     this.add(_id, _client)
@@ -94,7 +91,7 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
     const _packet = new ServerPacket(_data as Buffer)
     const _packetId: byte = _packet.readByte()
     const _clientId: byte = _packet.readByte()
-    this.emit(_packetId, _packet, _clientId, this.clients)
+    this.emit(_packetId, _packet, _clientId)
   }
 
   private _clientClosed(_clientId: uint32): void {
