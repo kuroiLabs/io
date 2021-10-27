@@ -1,12 +1,12 @@
 import WebSocket from "ws"
 import { PACKETS } from "../common/packets.enum"
-import { Lobby } from "../../src/lobby"
+import { ILobby, Lobby } from "../../src/lobby"
 import { ServerPacket } from "../../src/net/server"
 
 export class TestLobby extends Lobby {
 
-  constructor() {
-    super()
+  constructor(_lobby: ILobby) {
+    super(_lobby)
     this.on(PACKETS.MESSAGE, this._onMessage)
   }
 
