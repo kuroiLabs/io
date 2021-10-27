@@ -1,8 +1,8 @@
-import { GeneratorService } from '@kuroi/numeric/generate'
-import WebSocket from 'ws'
-import { ServerPacket } from '../net/server'
-import { BasePacketHandler } from '../utils'
-import { ILobby } from './lobby.interface'
+import { GeneratorService } from "@kuroi/numeric/generate"
+import WebSocket from "ws"
+import { ServerPacket } from "../net/server"
+import { BasePacketHandler } from "../utils"
+import { ILobby } from "./lobby.interface"
 
 export interface Lobby {
   onClose?(client: WebSocket, id: byte): void
@@ -33,7 +33,7 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
   constructor(_lobby: ILobby) {
     super()
     this.id = _lobby && _lobby.id 
-    this.name = _lobby && _lobby.name || ''
+    this.name = _lobby && _lobby.name || ""
     this.maxClients = _lobby && _lobby.maxClients || Lobby.DEFAULT_MAX_CLIENTS
     this.wss = new WebSocket.Server({ noServer: true })
     this.clients = new Map<uint32, WebSocket>()
@@ -50,17 +50,17 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
 
   public add(_id: byte, _client: WebSocket): void {
     if (!_id)
-      return console.error('NO ID!', _id)
+      return console.error("NO ID!", _id)
     this.clients.set(_id, _client)
-    _client.on('open', this._connectionOpened.bind(this, _id))
-    _client.on('message', this._messageReceived.bind(this))
-    _client.on('close', this._clientClosed.bind(this, _id))
+    _client.on("open", this._connectionOpened.bind(this, _id))
+    _client.on("message", this._messageReceived.bind(this))
+    _client.on("close", this._clientClosed.bind(this, _id))
     if (this.onJoin)
       this.onJoin(_client, _id)
   }
 
   public connect(): void {
-    this.wss.on('connection', (_client: WebSocket) => {
+    this.wss.on("connection", (_client: WebSocket) => {
       this._handshake(_client)
     })
   }
