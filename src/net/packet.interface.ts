@@ -1,5 +1,5 @@
-export interface IPacket {
-  data(): ArrayBuffer
+export interface IPacket<T> {
+  data(): T
   readByte(): byte
   readBytes(_length?: int): Uint8Array
   writeByte(_byte: byte): void

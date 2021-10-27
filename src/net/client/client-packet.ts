@@ -1,6 +1,6 @@
 import { IPacket } from "../packet.interface"
 
-export class ClientPacket implements IPacket {
+export class ClientPacket implements IPacket<ArrayBuffer> {
 
   private buffer: ArrayBuffer
 
