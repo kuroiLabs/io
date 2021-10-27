@@ -4,7 +4,8 @@
   "description": "Node.js Typescript framework for server-side applications",
   "main": "index.js",
   "scripts": {
-    "test": "node lib/tests/tests.js",
+    "test:client": "http-server tests/client/dist",
+    "test:server": "node tests/server/index.js",
     "build": "shx rm -rf lib && tsc"
   },
   "repository": {
@@ -39,6 +40,7 @@
     "@types/node": "^16.11.6",
     "@types/ws": "^8.2.0",
     "http": "0.0.1-security",
+    "http-server": "^14.0.0",
     "shx": "^0.3.3"
   }
 }
