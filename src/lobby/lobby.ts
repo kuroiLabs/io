@@ -1,10 +1,25 @@
 import { Numeric } from '@kuroi/numeric'
 import WebSocket from 'ws'
+import { IPacket } from '../net'
 import { ServerPacket } from '../net/server'
 import { BasePacketHandler } from '../utils'
 import { ILobby } from './lobby.interface'
 
-export class Lobby extends BasePacketHandler implements ILobby {
+export interface Lobby {
+  onClose?(client: WebSocket, id: byte): void
+  onDestroy?(): void
+  onHandshake?(client: WebSocket, id: byte): void
+  onJoin?(client: WebSocket, id: byte): void
+  onLeave?(client: WebSocket, id: byte): void
+}
+
+type LobbyPacketHandlerCallback = (
+  packet: IPacket<Buffer>,
+  clientId: uint16,
+  clientMap: Map<uint32, WebSocket>
+) => void
+
+export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback> implements ILobby {
 
   public static readonly DEFAULT_MAX_CLIENTS: byte = 12
 
@@ -36,56 +51,59 @@ export class Lobby extends BasePacketHandler implements ILobby {
     }
   }
 
+  public add(_id: byte, _client: WebSocket): void {
+    if (!_id)
+      return console.error('NO ID!', _id)
+    this.clients.set(_id, _client)
+    _client.on('open', this._connectionOpened.bind(this, _id))
+    _client.on('message', this._messageReceived.bind(this))
+    _client.on('close', this._clientClosed.bind(this, _id))
+    if (this.onJoin)
+      this.onJoin(_client, _id)
+  }
+
   public connect(): void {
     this.wss.on('connection', (_client: WebSocket) => {
-      this.handshake(_client)
+      this._handshake(_client)
     })
   }
 
-  private handshake(_client: WebSocket): void {
-    if (this.clients.size >= this.maxClients) {
+  private _handshake(_client: WebSocket): void {
+    if (this.clients.size >= this.maxClients)
       return _client.close()
-    }
-    const id: byte = Numeric.generate.generateNumericId()
-    // allocate 2 byte buffer for packet
-    const _buffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT * 2)
-    const _packet = new ServerPacket(_buffer)
-    // write two bytes to packet: packet id and the client's new id
-    _packet.writeBytes([0, id])
-    _client.send(_packet.data())
-    this.add(id, _client)
-  }
-
-  public add(id: byte, _client: WebSocket): void {
-    if (!id) {
-      console.error('NO ID!', id)
-      return
-    }
-    this.clients.set(id, _client)
-    _client.on('open', this.onOpen.bind(this, id))
-    _client.on('message', this.onMessage.bind(this))
-    _client.on('close', this.onClose.bind(this, id))
+    const _id: byte = Numeric.generate.generateNumericId()
+    if (this.onHandshake)
+      this.onHandshake(_client, _id)
+    this.add(_id, _client)
   }
 
   public remove(_clientId: uint32): void {
-    this.clients.delete(_clientId)
+    const _client = this.clients.get(_clientId)
+    if (_client) {
+      if (this.onLeave)
+        this.onLeave(_client, _clientId)
+      this.clients.delete(_clientId)
+    }
   }
 
-  private onOpen(_clientId: uint32): void {
+  private _connectionOpened(_clientId: uint32): void {
     console.log(`Client [${_clientId}] connected!`)
   }
 
-  private onMessage(_data: WebSocket.Data): void {
+  private _messageReceived(_data: WebSocket.Data): void {
     const _packet = new ServerPacket(_data as Buffer)
     const _packetId: byte = _packet.readByte()
     const _clientId: byte = _packet.readByte()
     this.emit(_packetId, _packet, _clientId, this.clients)
   }
 
-  private onClose(clientId: uint32): void {
-    const _client = this.clients.get(clientId)
-    if (_client)
-      _client.removeAllListeners()  
+  private _clientClosed(_clientId: uint32): void {
+    const _client = this.clients.get(_clientId)
+    if (_client) {
+      _client.removeAllListeners()
+      if (this.onClose)
+        this.onClose(_client, _clientId)
+    } 
   }
 
   public setMaxClients(_max: byte): void {
@@ -95,6 +113,8 @@ export class Lobby extends BasePacketHandler implements ILobby {
   public destroy(): void {
     this.clients.forEach(_client => _client.close())
     this.wss.close()
+    if (this.onDestroy)
+      this.onDestroy()
   }
 
 }
