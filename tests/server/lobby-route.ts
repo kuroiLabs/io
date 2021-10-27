@@ -11,7 +11,7 @@ export class LobbyRoute extends Route {
   public lobbies: Map<uint32, Lobby> = new Map()
 
   constructor() {
-    super('test')
+    super("test")
   }
 
   @Post("/newlobby")
@@ -23,6 +23,7 @@ export class LobbyRoute extends Route {
       })
       this.lobbies.set(_lobby.id, _lobby)
       _response.json(_lobby.getConfig())
+      console.log("[LobbyRoute.newLobby] ::: Succesfully created new Lobby")
     } catch (_err) {
       console.error('[newLobbyHandler] uncaught exception', _err)
       _response.sendStatus(500).json({ error: 'Internal server error' })
