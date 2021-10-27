@@ -23,7 +23,7 @@ export class LobbyRoute extends Route {
     try {
       const _lobby = new TestLobby({
         id: this._generator.generateNumericId(),
-        name: GeneratorService.randomString(),
+        name: this._generator.randomString(),
         maxClients: 2
       })
       this.lobbies.set(_lobby.id, _lobby)
