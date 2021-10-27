@@ -3,7 +3,6 @@ import { tap } from "rxjs/operators"
 import { ILobby } from "../../lobby"
 import { ClientPacket } from "./client-packet"
 import { IHttpClient } from "./http/http-client.interface"
-import { IWebClient } from "./web-client.interface"
 
 export interface BaseWebClient {
   beforeConnect?(): void
@@ -11,9 +10,9 @@ export interface BaseWebClient {
   onError?(_error: Event): void
 }
 
-export abstract class BaseWebClient implements IWebClient {
+export abstract class BaseWebClient {
   
-  public id: int | undefined
+  public id: byte | uint16 | uint32 | undefined
 
   public socket: WebSocket | undefined
 
@@ -53,6 +52,14 @@ export abstract class BaseWebClient implements IWebClient {
     } catch (_err) {
       return throwError(() => _err)
     }
+  }
+
+  public send(_packet: ClientPacket): void {
+    if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
+      console.warn("No available WebSocket")
+      return
+    }
+    this.socket.send(_packet.data())
   }
 
   private _handleConnectionStream(_socket: WebSocket, _observer: Subscriber<ClientPacket>): void {
