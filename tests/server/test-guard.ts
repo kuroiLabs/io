@@ -1,6 +1,6 @@
 import { Syringe } from "@kuroi/syringe"
 import { NextFunction, Request, Response } from "express"
-import { Guard } from "../src/guard"
+import { Guard } from "../../src/guard"
 
 @Syringe.Injectable({
   scope: "global"
