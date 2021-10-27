@@ -4,15 +4,17 @@
   "description": "",
   "main": "dist/main.js",
   "dependencies": {
-    "@kuroi/syringe": "^1.0.4"
+    "@kuroi/syringe": "^1.0.4",
+    "rxjs": "^7.4.0"
   },
   "devDependencies": {
+    "html-webpack-plugin": "^4.4.0",
     "ts-loader": "^8.3.0",
     "typescript": "^4.4.4",
-    "webpack": "^4.46.0",
+    "webpack": "4.42.1",
     "webpack-cli": "^3.3.12"
   },
   "scripts": {
-    "build": "webpack"
+    "build": "shx rm -rf ./dist && webpack"
   }
 }
