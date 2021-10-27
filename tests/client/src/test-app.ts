@@ -1,20 +1,17 @@
 import { Syringe } from "@kuroi/syringe"
 import { Observable } from "rxjs"
 import { switchMap } from "rxjs/operators"
-import { IPacket } from "../../../src/net"
 import { ClientPacket } from "../../../src/net/client"
 import { BasePacketHandler } from "../../../src/utils"
+import { PACKETS } from "../../common/packets.enum"
 import { TestClient } from "./test-client"
 
-enum PACKETS {
-  WELCOME,
-  MESSAGE
-}
+type ClientPacketCallback = (packet: ClientPacket) => void
 
 @Syringe.Injectable({
   scope: "global"
 })
-export class TestApp extends BasePacketHandler implements Syringe.OnInit {
+export class TestApp extends BasePacketHandler<ClientPacketCallback> implements Syringe.OnInit {
 
   private root: string = `http://localhost:6969`
 
@@ -44,17 +41,17 @@ export class TestApp extends BasePacketHandler implements Syringe.OnInit {
     this._setUpListeners()
   }
 
-  private _emitPacket(_packet: IPacket): void {
+  private _emitPacket(_packet: ClientPacket): void {
     const _packetId: byte = _packet.readByte()
     this.emit(_packetId, _packet)
   }
 
-  private _onWelcome(_packet: IPacket): void {
+  private _onWelcome(_packet: ClientPacket): void {
     const _clientId: byte = _packet.readByte()
     console.log("Received welcome packet from server and client ID [" + _clientId + "]")
   }
 
-  private _onMessage(_packet: IPacket): void {
+  private _onMessage(_packet: ClientPacket): void {
     const _clientId: byte = _packet.readByte()
     const _message: string = _packet.readString()
     console.log(
