@@ -1,8 +1,8 @@
 import WebSocket from 'ws'
-import { IPacket } from '../packet.interface'
+import { ServerPacket } from './server-packet'
 
 export type ServerPacketHandler = (
   _clientId: uint32,
-  _packet: IPacket,
+  _packet: ServerPacket,
   _clients?: Map<uint32, WebSocket>
 ) => void
