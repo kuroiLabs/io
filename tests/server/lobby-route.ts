@@ -1,6 +1,6 @@
+import { GeneratorService } from "@kuroi/numeric/generate"
 import { Syringe } from "@kuroi/syringe"
 import { Request, Response } from "express"
-import { Numeric } from "../../../numeric/lib"
 import { Post } from "../../src/endpoint"
 import { Lobby } from "../../src/lobby"
 import { Route } from "../../src/route"
@@ -11,6 +11,9 @@ export class LobbyRoute extends Route {
 
   public lobbies: Map<uint32, Lobby> = new Map()
 
+  // @todo: create an injection token for this and add to constructor
+  private _generator = new GeneratorService()
+
   constructor() {
     super("test")
   }
@@ -19,7 +22,8 @@ export class LobbyRoute extends Route {
   public newLobby(_request: Request, _response: Response) {
     try {
       const _lobby = new TestLobby({
-        name: Numeric.generate.randomString(),
+        id: this._generator.generateNumericId(),
+        name: GeneratorService.randomString(),
         maxClients: 2
       })
       this.lobbies.set(_lobby.id, _lobby)
