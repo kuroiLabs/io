@@ -1,7 +1,9 @@
 import { Lobby } from "./lobby"
+import { ILobbyManager } from "./lobby-manager.interface"
 
-export abstract class LobbyManager {
-  private lobbies: Map<int, Lobby>
+export abstract class BaseLobbyManager implements ILobbyManager {
+
+  protected lobbies: Map<int, Lobby>
 
   constructor() {
     this.lobbies = new Map()
