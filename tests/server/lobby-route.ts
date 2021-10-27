@@ -4,6 +4,7 @@ import { Numeric } from "../../../numeric/lib"
 import { Post } from "../../src/endpoint"
 import { Lobby } from "../../src/lobby"
 import { Route } from "../../src/route"
+import { TestLobby } from "./test-lobby"
 
 @Syringe.Injectable()
 export class LobbyRoute extends Route {
@@ -17,15 +18,15 @@ export class LobbyRoute extends Route {
   @Post("/newlobby")
   public newLobby(_request: Request, _response: Response) {
     try {
-      const _lobby = new Lobby({
+      const _lobby = new TestLobby({
         name: Numeric.generate.randomString(),
         maxClients: 2
       })
       this.lobbies.set(_lobby.id, _lobby)
       _response.json(_lobby.getConfig())
-      console.log("[LobbyRoute.newLobby] ::: Succesfully created new Lobby")
+      console.log("[LobbyRoute.newLobby] ::: Succesfully created new Lobby [" + _lobby.id + "]")
     } catch (_err) {
-      console.error('[newLobbyHandler] uncaught exception', _err)
+      console.error('[LobbyRoute.newLobby] :::  uncaught exception', _err)
       _response.sendStatus(500).json({ error: 'Internal server error' })
     }
   }
