@@ -4,9 +4,11 @@
   "description": "Node.js Typescript framework for server-side applications",
   "main": "index.js",
   "scripts": {
+    "build": "shx rm -rf lib && tsc",
+    "build:test:client": "cd tests/client && npm run build",
+    "build:test:server": "cd tests/server && npm run build",
     "test:client": "http-server tests/client/dist",
-    "test:server": "node tests/server/index.js",
-    "build": "shx rm -rf lib && tsc"
+    "test:server": "node tests/server/index.js"
   },
   "repository": {
     "type": "git",
