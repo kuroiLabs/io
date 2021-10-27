@@ -4,8 +4,8 @@ import { IPacket } from "../net/packet.interface"
 type ClientMap = Map<int, WebSocket>
 
 type PacketHandlerCallback = (
-  _clientId: int,
   _packet: IPacket,
+  _clientId?: int,
   _clients?: ClientMap
 ) => void
 
@@ -31,9 +31,9 @@ export abstract class BasePacketHandler {
       _callbacks.splice(_index, 1)
   }
 
-  public emit(_packetId: byte, _clientId: int, _packet: IPacket, _clients?: ClientMap): void {
+  public emit(_packetId: byte, _packet: IPacket, _clientId?: int, _clients?: ClientMap): void {
     const _callbacks: PacketHandlerCallback[] = this._events.get(_packetId) || []
-    _callbacks.forEach(_callback => _callback(_clientId, _packet, _clients))
+    _callbacks.forEach(_callback => _callback(_packet, _clientId, _clients))
   }
 
 } 
