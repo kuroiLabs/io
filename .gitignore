@@ -79,3 +79,4 @@ package-lock.json
 # Output
 lib/
 tests/client/dist/
+tests/server/dist/
