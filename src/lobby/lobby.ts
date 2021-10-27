@@ -50,7 +50,7 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
 
   public add(_id: byte, _client: WebSocket): void {
     if (!_id)
-      return console.error("NO ID!", _id)
+      return console.error("Invalid client ID:", _id)
     this.clients.set(_id, _client)
     _client.on("open", this._connectionOpened.bind(this, _id))
     _client.on("message", this._messageReceived.bind(this))
