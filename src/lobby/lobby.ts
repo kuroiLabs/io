@@ -79,7 +79,7 @@ export class Lobby extends BasePacketHandler implements ILobby {
     const _packet = new ServerPacket(_data as Buffer)
     const _packetId: byte = _packet.readByte()
     const _clientId: byte = _packet.readByte()
-    this.emit(_packetId, _clientId, _packet, this.clients)
+    this.emit(_packetId, _packet, _clientId, this.clients)
   }
 
   private onClose(clientId: uint32): void {
