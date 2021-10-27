@@ -1,8 +1,8 @@
 import { IPacket } from "../net/packet.interface"
 
-type PacketHandlerCallback = (_packet: IPacket<any>, ..._args: any[]) => void
+type PacketHandlerCallback = (..._args: any[]) => void
 
-export abstract class BasePacketHandler {
+export abstract class BasePacketHandler<T extends PacketHandlerCallback = PacketHandlerCallback> {
 
   protected encoder: TextEncoder = new TextEncoder()
 
@@ -10,7 +10,7 @@ export abstract class BasePacketHandler {
 
   private _events = new Map<string | int, PacketHandlerCallback[]>()
 
-  public on(_packetId: byte, _callback: PacketHandlerCallback): void {
+  public on(_packetId: byte, _callback: T): void {
     if (!this._events.has(_packetId))
       this._events.set(_packetId, [])
     const _callbacks: PacketHandlerCallback[] = this._events.get(_packetId) || []
@@ -19,7 +19,7 @@ export abstract class BasePacketHandler {
     _callbacks.push(_callback)
   }
 
-  public off(_eventName: string, _callback: PacketHandlerCallback): void {
+  public off(_eventName: string, _callback: T): void {
     if (!this._events.has(_eventName))
       return
     const _callbacks: PacketHandlerCallback[] = this._events.get(_eventName) || []
@@ -33,4 +33,4 @@ export abstract class BasePacketHandler {
     _callbacks.forEach(_callback => _callback(_packet, ..._args))
   }
 
-} 
+}
