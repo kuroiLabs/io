@@ -1,6 +1,6 @@
 import { IPacket } from "../net/packet.interface"
 
-type PacketHandlerCallback = (..._args: any[]) => void
+export type PacketHandlerCallback = (..._args: any[]) => void
 
 export abstract class BasePacketHandler<T extends PacketHandlerCallback = PacketHandlerCallback> {
 
