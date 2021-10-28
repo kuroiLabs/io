@@ -1,5 +1,5 @@
 import express from 'express'
-import { Endpoint } from '../endpoint'
+import { Endpoint, IEndpoint, IStaticRoute } from '../endpoint'
 import { Guard } from '../guard'
 import { IRoute } from './route.interface'
 
@@ -15,14 +15,15 @@ export abstract class Route implements IRoute {
 
   public path: string
 
-  constructor(path: string, guards?: Guard[]) {
+  constructor(path: string, route: IStaticRoute,  guards?: Guard[]) {
     this.path = `${Route.ROOT}/${path}` || ''
     this.guards = guards || []
-    const _endpoints: Endpoint[] = Object.getPrototypeOf(this).constructor._endpoints
-    this._configureEndpoints(_endpoints)
+    this._configureEndpoints(route._endpoints.filter(_endpoint =>
+      _endpoint._route && _endpoint._route === route
+    ))
   }
 
-  private _configureEndpoints(_endpoints: Endpoint[]): void {
+  private _configureEndpoints(_endpoints: IEndpoint[]): void {
     for (const _endpoint of _endpoints) {
       // front load guards/middleware
       const _handlers: express.RequestHandler[] = this.guards && this.guards.map(_guard =>

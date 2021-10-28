@@ -15,7 +15,8 @@ export function endpointDecorator(_path: string, _method: string, _guards?: Guar
         path: _path,
         method: _method,
         handler: _descriptor.value,
-        guards: _guards
+        guards: _guards,
+        _route: _target.constructor
       })
     )
     return _descriptor
