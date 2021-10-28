@@ -21,4 +21,8 @@ export abstract class BaseLobbyManager implements ILobbyManager {
     return this.lobbies.get(_lobbyId) || null
   }
 
+  public getLobbies(): Lobby[] {
+    return Array.from(this.lobbies.values())
+  }
+
 }
