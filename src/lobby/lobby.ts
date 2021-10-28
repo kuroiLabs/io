@@ -1,4 +1,5 @@
 import { GeneratorService } from "@kuroi/numeric/generate"
+import http from "http"
 import WebSocket from "ws"
 import { ServerPacket } from "../net/server"
 import { BasePacketHandler } from "../utils"
@@ -52,7 +53,7 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
     if (!_id)
       return console.error("Invalid client ID:", _id)
     this.clients.set(_id, _client)
-    _client.on("open", this._connectionOpened.bind(this, _id))
+    _client.on("open", this._connectionOpened.bind(this, _client, _id))
     _client.on("message", this._messageReceived.bind(this))
     _client.on("close", this._clientClosed.bind(this, _id))
     if (this.onJoin)
@@ -62,6 +63,12 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
   public connect(): void {
     this.wss.on("connection", (_client: WebSocket) => {
       this._handshake(_client)
+    })
+  }
+
+  public upgrade(request: http.IncomingMessage, socket: any, head: any): void {
+    this.wss.handleUpgrade(request, socket, head, (_ws: WebSocket) => {
+      this.wss.emit("connection", _ws, request)
     })
   }
 
@@ -83,8 +90,9 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
     }
   }
 
-  private _connectionOpened(_clientId: uint32): void {
-    console.log(`Client [${_clientId}] connected!`)
+  private _connectionOpened(_client: WebSocket, _clientId: byte): void {
+    if (this.onJoin)
+      this.onJoin(_client, _clientId)
   }
 
   private _messageReceived(_data: WebSocket.Data): void {
@@ -100,7 +108,10 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
       _client.removeAllListeners()
       if (this.onClose)
         this.onClose(_client, _clientId)
-    } 
+    }
+    if (!this.clients.size) {
+      this.destroy()
+    }
   }
 
   public setMaxClients(_max: byte): void {
