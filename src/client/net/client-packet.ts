@@ -1,4 +1,4 @@
-import { IPacket } from "../packet.interface"
+import { IPacket } from "../../common/net"
 
 export class ClientPacket implements IPacket<ArrayBuffer> {
 

@@ -1,7 +1,7 @@
 import { Syringe } from "@kuroi/syringe"
 import { switchMap } from "rxjs/operators"
-import { ClientPacket } from "../../../src/net/client"
-import { BasePacketHandler } from "../../../src/utils"
+import { ClientPacket } from "../../../src/client/net"
+import { BasePacketHandler } from "../../../src/common/utils"
 import { PACKETS } from "../../common/packets.enum"
 import { TestClient } from "./test-client"
 

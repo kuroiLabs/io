@@ -1,5 +1,5 @@
 import { Syringe } from "@kuroi/syringe"
-import { HttpClient } from "../../../src/net/client"
+import { HttpClient } from "../../../src/client/http"
 
 const http = new HttpClient()
 

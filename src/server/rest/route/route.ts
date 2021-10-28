@@ -1,7 +1,7 @@
-import express from 'express'
-import { Endpoint, IEndpoint, IStaticRoute } from '../endpoint'
-import { Guard } from '../guard'
-import { IRoute } from './route.interface'
+import express from "express"
+import { Endpoint, IEndpoint, IStaticRoute } from "../endpoint"
+import { Guard } from "../guard"
+import { IRoute } from "./route.interface"
 
 export abstract class Route implements IRoute {
 
@@ -16,7 +16,7 @@ export abstract class Route implements IRoute {
   public path: string
 
   constructor(path: string, route: IStaticRoute,  guards?: Guard[]) {
-    this.path = `${Route.ROOT}/${path}` || ''
+    this.path = `${Route.ROOT}/${path}` || ""
     this.guards = guards || []
     this._configureEndpoints(route._endpoints.filter(_endpoint =>
       _endpoint._route && _endpoint._route === route

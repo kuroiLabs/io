@@ -1,13 +1,13 @@
 import { Syringe } from "@kuroi/syringe"
 import { Observable } from "rxjs"
-import { ILobby } from "../../../src/lobby"
-import { BaseWebClient, IHttpClient } from "../../../src/net/client"
+import { ILobby } from "../../../src/common"
+import { WebClient, IHttpClient } from "../../../src/client"
 import { HTTP } from "./http.token"
 
 @Syringe.Injectable({
   scope: "global"
 })
-export class TestClient extends BaseWebClient {
+export class TestClient extends WebClient {
 
   constructor(@Syringe.Inject(HTTP) private http: IHttpClient) {
     super()

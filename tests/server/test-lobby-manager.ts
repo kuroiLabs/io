@@ -1,5 +1,5 @@
 import { Syringe } from "@kuroi/syringe"
-import { BaseLobbyManager } from "../../src/lobby";
+import { BaseLobbyManager } from "../../src/server/lobby"
 
 @Syringe.Injectable({
   scope: "global"

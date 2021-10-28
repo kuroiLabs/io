@@ -1,7 +1,7 @@
 import WebSocket from "ws"
 import { PACKETS } from "../common/packets.enum"
-import { ILobby, Lobby } from "../../src/lobby"
-import { ServerPacket } from "../../src/net/server"
+import { Lobby, ServerPacket } from "../../src/server"
+import { ILobby } from "../../src/common/lobby"
 
 export class TestLobby extends Lobby {
 

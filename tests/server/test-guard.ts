@@ -1,15 +1,21 @@
 import { Syringe } from "@kuroi/syringe"
 import { NextFunction, Request, Response } from "express"
-import { Guard } from "../../src/guard"
+import { Guard } from "../../src/server/rest"
 
 @Syringe.Injectable({
   scope: "global"
 })
 export class TestGuard extends Guard {
   constructor() {
-    super(function _testGuard(_req: Request, _res: Response, _next: NextFunction) {
+    super((_req: Request, _res: Response, _next: NextFunction) => {
       console.log("testGuard:::", "Succesfully ran guard")
-      _next()
+      if (this.validate(_req)) {
+        _next()
+      }
     })
+  }
+
+  private validate(_req: Request): boolean {
+    return true
   }
 }

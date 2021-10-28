@@ -2,8 +2,7 @@ import { Syringe } from "@kuroi/syringe"
 import cors from "cors"
 import express from "express"
 import http from "http"
-import { BaseLobbyManager } from "../../src/lobby"
-import { Route } from "../../src/route"
+import { BaseLobbyManager, Route } from "../../src/server"
 import { BaseServer } from "../../src/server"
 import { LobbyRoute } from "./lobby-route"
 import { EXPRESS, PORT } from "./test-api-tokens"
@@ -23,7 +22,7 @@ export class TestServer extends BaseServer {
     @Syringe.Inject(TestCorsGuard) corsGuard: TestCorsGuard,
     @Syringe.Inject(TestLobbyManager) lobbyManager: BaseLobbyManager
   ) {
-    super(api, port, true, [lobbyRoute, testRoute], [corsGuard], lobbyManager)
+    super(api, port, [lobbyRoute, testRoute], [corsGuard], lobbyManager)
     this.api.use(cors())
   }
 

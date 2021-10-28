@@ -1,9 +1,9 @@
 import { GeneratorService } from "@kuroi/numeric/generate"
 import http from "http"
 import WebSocket from "ws"
-import { ServerPacket } from "../net/server"
-import { BasePacketHandler } from "../utils"
-import { ILobby } from "./lobby.interface"
+import { ILobby } from "../../common/lobby"
+import { BasePacketHandler } from "../../common/utils"
+import { ServerPacket } from "../net"
 
 export interface Lobby {
   onClose?(client: WebSocket, id: byte): void

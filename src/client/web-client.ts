@@ -1,9 +1,9 @@
 import { Observable, Subscriber, throwError } from "rxjs"
 import { shareReplay } from "rxjs/operators"
-import { BasePacketHandler } from "../../utils"
-import { ClientPacket } from "./client-packet"
+import { BasePacketHandler } from "../common/utils"
+import { ClientPacket } from "./net/client-packet"
 
-export interface BaseWebClient {
+export interface WebClient {
   beforeConnect?(): void
   beforeDisconnect?(): void
   beforeSend?(packet: ClientPacket): boolean
@@ -12,7 +12,7 @@ export interface BaseWebClient {
   onError?(_error: any): void
 }
 
-export abstract class BaseWebClient extends BasePacketHandler {
+export class WebClient extends BasePacketHandler {
   
   public id: byte | uint16 | uint32 | undefined
 

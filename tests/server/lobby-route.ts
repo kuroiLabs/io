@@ -2,9 +2,7 @@ import { GeneratorService } from "@kuroi/numeric/generate"
 import { isUInt16 } from "@kuroi/numeric/typing"
 import { Syringe } from "@kuroi/syringe"
 import { Request, Response } from "express"
-import { Delete, Post } from "../../src/endpoint"
-import { BaseLobbyManager } from "../../src/lobby"
-import { Route } from "../../src/route"
+import { BaseLobbyManager, Delete, Post, Route } from "../../src/server"
 import { TestLobby } from "./test-lobby"
 import { TestLobbyManager } from "./test-lobby-manager"
 
@@ -12,7 +10,8 @@ import { TestLobbyManager } from "./test-lobby-manager"
 export class LobbyRoute extends Route {
 
   constructor(
-    @Syringe.Inject(TestLobbyManager) private lobbyManager: BaseLobbyManager,
+    @Syringe.Inject(TestLobbyManager)
+    private lobbyManager: BaseLobbyManager,
     private _generator = new GeneratorService()
   ) {
     super("lobby", LobbyRoute)
