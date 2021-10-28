@@ -7,7 +7,7 @@ import { TestGuard } from "./test-guard"
 @Syringe.Injectable()
 export class TestRoute extends Route {
   constructor() {
-    super('test')
+    super('test', TestRoute)
   }
 
   @Get("/leo", [Syringe.inject(TestGuard)])
