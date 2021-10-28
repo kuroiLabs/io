@@ -1,86 +1,91 @@
-import { Observable, Subscriber } from "rxjs"
+import { Observable, throwError } from "rxjs"
 import { IHttpClient } from "./http-client.interface"
 import { IHttpOptions } from "./http-options.interface"
 import { HttpRequest } from "./http-request"
 
 export class HttpClient implements IHttpClient {
 
-  public delete<T = any>(url: string, options?: IHttpOptions): Observable<T> {
-    return new Observable<T>(_observer => {
-      const _request: HttpRequest = new HttpRequest({
-        url,
-        options,
-        method: "DELETE"
-      })
-      this._request(_request, _observer)
+  public delete<T = any>(url: string, options: IHttpOptions = {
+    headers: { "Content-Type": "application/json" }
+  }): Observable<T> {
+    const _request: HttpRequest = new HttpRequest({
+      url,
+      options,
+      method: "DELETE"
     })
+    return this._request(_request)
   }
 
-  public get<T = any>(url: string, options?: IHttpOptions): Observable<T> {
-    return new Observable<T>(_observer => {
-      const _request: HttpRequest = new HttpRequest({
-        url,
-        options,
-        method: "GET"
-      })
-      this._request(_request, _observer)
+  public get<T = any>(url: string, options: IHttpOptions = {
+    headers: { "Content-Type": "application/json" }
+  }): Observable<T> {
+    const _request: HttpRequest = new HttpRequest({
+      url,
+      options,
+      method: "GET"
     })
+    return this._request(_request)
   }
 
-  public patch<T = any>(url: string, body: any, options?: IHttpOptions): Observable<T> {
-    return new Observable<T>(_observer => {
-      const _request: HttpRequest = new HttpRequest({
-        url,
-        options,
-        body,
-        method: "PATCH"
-      })
-      this._request(_request, _observer)
+  public patch<T = any>(url: string, body: any, options: IHttpOptions = {
+    headers: { "Content-Type": "application/json" }
+  }): Observable<T> {
+    const _request: HttpRequest = new HttpRequest({
+      url,
+      options,
+      body,
+      method: "PATCH"
     })
+    return this._request(_request)
   }
 
-  public post<T = any>(url: string, body: any, options?: IHttpOptions): Observable<T> {
-    return new Observable<T>(_observer => {
-      const _request: HttpRequest = new HttpRequest({
-        url,
-        options,
-        body,
-        method: "POST"
-      })
-      this._request(_request, _observer)
+  public post<T = any>(url: string, body: any, options: IHttpOptions = {
+    headers: { "Content-Type": "application/json" }
+  }): Observable<T> {
+    const _request: HttpRequest = new HttpRequest({
+      url,
+      options,
+      body,
+      method: "POST"
     })
+    return this._request(_request)
   }
 
-  public put<T = any>(url: string, body: any, options?: IHttpOptions): Observable<T> {
-    return new Observable<T>(_observer => {
-      const _request: HttpRequest = new HttpRequest({
-        url,
-        options,
-        body,
-        method: "PUT"
-      })
-      this._request(_request, _observer)
+  public put<T = any>(url: string, body: any, options: IHttpOptions = {
+    headers: { "Content-Type": "application/json" }
+  }): Observable<T> {
+    const _request: HttpRequest = new HttpRequest({
+      url,
+      options,
+      body,
+      method: "PUT"
     })
+    return this._request(_request)
   }
 
-  private _request(_request: HttpRequest, _observer: Subscriber<any>): void {
+  private _request<T>(_request: HttpRequest): Observable<T> {
     try {
-      const _xhr = new XMLHttpRequest()
-      if (_request.options && _request.options.headers)
-        this._setHeaders(_xhr, _request.options.headers)
-      _xhr.open(_request.method, _request.getFullUrl())
-      _xhr.addEventListener("load", () => {
-        switch (_xhr.responseType) {
-          case "text": _observer.next(_xhr.responseText); break
-          case "json": _observer.next(JSON.parse(_xhr.responseText)); break
+      return new Observable(_observer => {
+        const _xhr = new XMLHttpRequest()
+        _xhr.open(_request.method, _request.getFullUrl(), true)
+
+        if (_request.options && _request.options.headers)
+          this._setHeaders(_xhr, _request.options.headers)
+
+        _xhr.onload = () => {
+          switch (_xhr.responseType) {
+            case "text": _observer.next(<unknown>_xhr.responseText as T); break
+            default: _observer.next(JSON.parse(_xhr.responseText)); break
+          }
         }
+        _xhr.onerror = _error => {
+          _observer.error(_error)
+        }
+  
+        _xhr.send(_request.body || null)
       })
-      _xhr.addEventListener("error", _error => {
-        _observer.error(_error)
-      })
-      _xhr.send()
     } catch (_err) {
-      _observer.error(_err)
+      return throwError(() => _err)
     }
   }
 
