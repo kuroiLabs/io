@@ -1,55 +1,47 @@
 import { Observable, Subscriber, throwError } from "rxjs"
-import { tap } from "rxjs/operators"
-import { ILobby } from "../../lobby"
+import { shareReplay } from "rxjs/operators"
+import { BasePacketHandler } from "../../utils"
 import { ClientPacket } from "./client-packet"
-import { IHttpClient } from "./http/http-client.interface"
 
 export interface BaseWebClient {
   beforeConnect?(): void
+  beforeDisconnect?(): void
+  beforeSend?(packet: ClientPacket): boolean
   onConnect?(): void
-  onError?(_error: Event): void
+  onDisconnect?(): void
+  onError?(_error: any): void
 }
 
-export abstract class BaseWebClient {
+export abstract class BaseWebClient extends BasePacketHandler {
   
   public id: byte | uint16 | uint32 | undefined
 
   public socket: WebSocket | undefined
 
-  public decoder: TextDecoder | undefined
-
-  public encoder: TextEncoder | undefined
-
   public state: byte = WebSocket.CLOSED
 
-  constructor(private http: IHttpClient) {
+  public encoder: TextEncoder = new TextEncoder()
 
-  }
+  public decoder: TextDecoder = new TextDecoder()
 
-  public createLobby(_url: string): Observable<ILobby> {
-    return this.http.post<ILobby>(_url, null).pipe(
-      tap(_lobby => console.log('Created lobby', _lobby))
-    )
+  private _stream: Observable<ClientPacket> | undefined
+
+  get stream$(): Observable<ClientPacket> {
+    if (!this._stream) {
+      this._stream = this._startStream().pipe(shareReplay(1))
+    }
+    return this._stream
   }
 
   public connect(_url: string): Observable<ClientPacket> {
     try {
       if (this.beforeConnect)
         this.beforeConnect()
-      this.socket = new WebSocket(_url)
-      this.socket.binaryType = "arraybuffer"
-      return new Observable<ClientPacket>(_observer => {
-        if (this.socket) {
-          this._handleConnectionStream(this.socket, _observer)
-          this._handleConnectionErrors(this.socket, _observer)
-        }  
-        return {
-          unsubscribe: () => {
-            this.socket?.close()
-          }
-        }
-      })
+      this.socket = this._createSocket(_url)
+      return this.stream$
     } catch (_err) {
+      if (this.onError)
+        this.onError(_err)
       return throwError(() => _err)
     }
   }
@@ -59,7 +51,43 @@ export abstract class BaseWebClient {
       console.warn("No available WebSocket")
       return
     }
+    if (this.beforeSend) {
+      const _proceed = this.beforeSend(_packet)
+      if (!_proceed)
+        return
+    }
     this.socket.send(_packet.data())
+  }
+
+  private _disconnect(): void {
+    if (this.state === WebSocket.CLOSED)
+      return
+
+    if (this.beforeDisconnect)
+      this.beforeDisconnect()
+    
+    this.socket?.close()
+    this.state = WebSocket.CLOSED
+
+    if (this._stream)
+      this._stream
+    
+    if (this.onDisconnect)
+      this.onDisconnect()
+  }
+
+  private _startStream(): Observable<ClientPacket> {
+    return new Observable<ClientPacket>(_observer => {
+      if (this.socket) {
+        this._handleConnectionStream(this.socket, _observer)
+        this._handleConnectionErrors(this.socket, _observer)
+      }
+      return {
+        unsubscribe: () => {
+          this._disconnect()
+        }
+      }
+    })
   }
 
   private _handleConnectionStream(_socket: WebSocket, _observer: Subscriber<ClientPacket>): void {
@@ -77,8 +105,13 @@ export abstract class BaseWebClient {
     _socket.addEventListener("error", _error => {
       if (this.onError)
         this.onError(_error)
-      _observer.error(_error)
     })
+  }
+
+  private _createSocket(_url: string): WebSocket {
+    const _socket = new WebSocket(_url)
+    _socket.binaryType = "arraybuffer"
+    return _socket
   }
 
 }
