@@ -3,11 +3,13 @@ import { IHttpClient } from "./http-client.interface"
 import { IHttpOptions } from "./http-options.interface"
 import { HttpRequest } from "./http-request"
 
+const DEFAULT_HEADERS = {
+  headers: { "Content-Type": "application/json" }
+}
+
 export class HttpClient implements IHttpClient {
 
-  public delete<T = any>(url: string, options: IHttpOptions = {
-    headers: { "Content-Type": "application/json" }
-  }): Observable<T> {
+  public delete<T = any>(url: string, options: IHttpOptions = DEFAULT_HEADERS): Observable<T> {
     const _request: HttpRequest = new HttpRequest({
       url,
       options,
@@ -16,9 +18,7 @@ export class HttpClient implements IHttpClient {
     return this._request(_request)
   }
 
-  public get<T = any>(url: string, options: IHttpOptions = {
-    headers: { "Content-Type": "application/json" }
-  }): Observable<T> {
+  public get<T = any>(url: string, options: IHttpOptions = DEFAULT_HEADERS): Observable<T> {
     const _request: HttpRequest = new HttpRequest({
       url,
       options,
@@ -27,9 +27,7 @@ export class HttpClient implements IHttpClient {
     return this._request(_request)
   }
 
-  public patch<T = any>(url: string, body: any, options: IHttpOptions = {
-    headers: { "Content-Type": "application/json" }
-  }): Observable<T> {
+  public patch<T = any>(url: string, body: any, options: IHttpOptions = DEFAULT_HEADERS): Observable<T> {
     const _request: HttpRequest = new HttpRequest({
       url,
       options,
@@ -39,9 +37,7 @@ export class HttpClient implements IHttpClient {
     return this._request(_request)
   }
 
-  public post<T = any>(url: string, body: any, options: IHttpOptions = {
-    headers: { "Content-Type": "application/json" }
-  }): Observable<T> {
+  public post<T = any>(url: string, body: any, options: IHttpOptions = DEFAULT_HEADERS): Observable<T> {
     const _request: HttpRequest = new HttpRequest({
       url,
       options,
@@ -51,9 +47,7 @@ export class HttpClient implements IHttpClient {
     return this._request(_request)
   }
 
-  public put<T = any>(url: string, body: any, options: IHttpOptions = {
-    headers: { "Content-Type": "application/json" }
-  }): Observable<T> {
+  public put<T = any>(url: string, body: any, options: IHttpOptions = DEFAULT_HEADERS): Observable<T> {
     const _request: HttpRequest = new HttpRequest({
       url,
       options,
