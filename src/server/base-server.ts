@@ -1,33 +1,25 @@
-import express from 'express'
-import { Guard } from '../guard'
-import { ILobby, Lobby } from '../lobby'
-import { Route } from '../route'
+import express from "express"
+import http from "http"
+import https from "https"
+import { URL } from "url"
+import WebSocket from "ws"
+import { Guard } from "../guard"
+import { BaseLobbyManager } from "../lobby"
+import { Route } from "../route"
 
 export abstract class BaseServer {
 
-  public lobbies: ILobby[] = []
+  protected httpServer?: http.Server | https.Server
 
   constructor(
     public api: express.Express,
     public port: number,
-    public routes: Route[],
-    public guards: Guard[]
+    public ws: boolean = false,
+    public routes: Route[] = [],
+    public guards: Guard[] = [],
+    private lobbyManager?: BaseLobbyManager
   ) {
 
-  }
-
-  public addLobby(_lobby: ILobby): Lobby {
-    const _newLobby: Lobby = new Lobby(_lobby)
-    this.lobbies.push(_newLobby)
-    return _newLobby
-  }
-
-  public removeLobby(_lobbyId: uint16): void {
-    const _lobbyIndex: int = this.lobbies.findIndex(_lobby =>
-      _lobby.id === _lobbyId
-    )
-    if (_lobbyIndex > -1)
-      this.lobbies.splice(_lobbyIndex, 1)
   }
 
   public onInit(): void {
@@ -46,5 +38,23 @@ export abstract class BaseServer {
   }
 
   public abstract start(): void
+
+  protected enableWebSockets(): void {
+    if (!this.httpServer || !this.lobbyManager)
+      return
+    this.httpServer.on("upgrade", (_request: http.IncomingMessage, _socket: any, _head: any) => {
+      if (!_request.url)
+        return
+      const _url: string = _request.url.substring(_request.url.indexOf('/'), _request.url.length)
+      if (_url.startsWith("/lobby")) {
+        const _lobbyId = _request.url.split('/').pop()
+        this.lobbyManager?.getLobbies().forEach(_lobby => {
+          if (_lobbyId && +_lobbyId === _lobby.id) {
+            _lobby.upgrade(_request, _socket, _head)
+          }
+        })
+      }
+    })
+  }
 
 }
