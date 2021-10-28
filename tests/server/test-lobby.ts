@@ -7,10 +7,11 @@ export class TestLobby extends Lobby {
 
   constructor(_lobby: ILobby) {
     super(_lobby)
-    this.on(PACKETS.MESSAGE, this._onMessage)
+    this.on(PACKETS.MESSAGE, this._onMessage.bind(this))
   }
 
   public onHandshake(_client: WebSocket, _clientId: byte): void {
+    console.log("[TestLobby.onHandshake] ::: Handshaking client [" + _clientId + "]")
     // allocate 2 byte buffer for packet
     const _buffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT * 2)
     const _packet = new ServerPacket(_buffer)
