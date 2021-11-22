@@ -199,7 +199,9 @@ function sendMessage(message: string): void {
   // translate message to byte array
   const bytes: Uint8Array = new TextEncoder().encode(message)
   // calculate byteLength of string bytes + packet ID + client ID
-  const byteLength: int = bytes.byteLength + (Uint8Array.BYTES_PER_ELEMENT * 2)
+  const byteLength: int = Uint8Array.BYTES_PER_ELEMENT
+    + Uint16Array.BYTES_PER_ELEMENT
+    + bytes.byteLength
   // instantiate a new ArrayBuffer to hold bytes
   const buffer: ArrayBuffer = new ArrayBuffer(byteLength)
   // create a packet instance around the buffer
