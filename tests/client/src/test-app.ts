@@ -3,6 +3,7 @@ import { switchMap } from "rxjs/operators"
 import { ClientPacket } from "../../../src/client/net"
 import { BasePacketHandler } from "../../../src/common/utils"
 import { PACKETS } from "../../common/packets.enum"
+import { MessageService } from "./message.service"
 import { TestClient } from "./test-client"
 
 type ClientPacketCallback = (packet: ClientPacket) => void
@@ -23,7 +24,11 @@ export class TestApp extends BasePacketHandler<ClientPacketCallback> implements 
   }
 
   constructor(
-    @Syringe.Inject(TestClient) private client: TestClient
+    @Syringe.Inject(TestClient)
+    private _client: TestClient,
+
+    @Syringe.Inject(MessageService)
+    private _messages: MessageService
   ) {
     super()
   }
@@ -33,10 +38,8 @@ export class TestApp extends BasePacketHandler<ClientPacketCallback> implements 
     const _lobbyId: string = location.hash && location.hash.replace("#", "")
     if (_lobbyId) {
       const _url: string = `${this.wsRoot}/lobby/${_lobbyId}`
-      console.log("Attempting to access ws URL:", _url)
-      this.client.connect(_url).subscribe({
+      this._client.connect(_url).subscribe({
         next: _packet => {
-          console.log("[TestApp.onInit] ::: Received packet")
           this._emitPacket(_packet)
         }
       })
@@ -55,17 +58,14 @@ export class TestApp extends BasePacketHandler<ClientPacketCallback> implements 
 
   private _onWelcome(_packet: ClientPacket): void {
     const _clientId: byte = _packet.readByte()
-    this.client.id = _clientId
+    this._client.id = _clientId
     console.log("Received welcome packet from server and client ID [" + _clientId + "]")
   }
 
   private _onMessage(_packet: ClientPacket): void {
     const _clientId: byte = _packet.readByte()
     const _message: string = _packet.readString()
-    console.log(
-      "Received message from client [" + _clientId + "]",
-      _message
-    )
+    this._messages.addMessage(_clientId, _message)
   }
 
   public sendMessage(_message: string): void {
@@ -74,32 +74,49 @@ export class TestApp extends BasePacketHandler<ClientPacketCallback> implements 
     const _buffer: ArrayBuffer = new ArrayBuffer(_byteLength)
     const _packet = new ClientPacket(_buffer)
     _packet.writeByte(PACKETS.MESSAGE)
-    _packet.writeByte(this.client.id as byte)
+    _packet.writeByte(this._client.id as byte)
     _packet.writeBytes(_bytes)
-    this.client.send(_packet)
+    this._client.send(_packet)
+    this._messages.addMessage(this._client.id as number, _message)
   }
 
   private _setUpListeners(): void {
     document.addEventListener("DOMContentLoaded", () => {
-      const _textbox: HTMLTextAreaElement = document.getElementById("user-input") as HTMLTextAreaElement
-      const _sendMessageButton: HTMLButtonElement = document.getElementById("submit-button") as HTMLButtonElement
+      const _messageBox: HTMLTextAreaElement = document.getElementById("message-input") as HTMLTextAreaElement
+      const _sendMessageButton: HTMLButtonElement = document.getElementById("send-button") as HTMLButtonElement
       const _newLobbyButton: HTMLButtonElement = document.getElementById("new-lobby-button") as HTMLButtonElement
       _sendMessageButton?.addEventListener("click", () => {
-        if (_textbox && _textbox.value)
-          this.sendMessage(_textbox.value)
+        if (_messageBox && _messageBox.value) {
+          this.sendMessage(_messageBox.value)
+          _messageBox.value = ""
+        }
       })
-      _newLobbyButton?.addEventListener("click", () => {
-        this._createLobby()
+      _newLobbyButton?.addEventListener("click", () => this._createLobby())
+      _messageBox.addEventListener("keydown", e => {
+        if (
+          e.key.toLowerCase() === "enter" &&
+          _messageBox &&
+          _messageBox.value
+        ) {
+          e.preventDefault()
+          this.sendMessage(_messageBox.value)
+          _messageBox.value = ""
+          _messageBox.blur()
+        }
+      })
+      window.addEventListener("unload", () => {
+        if (this._client.socket?.readyState === WebSocket.OPEN)
+          this._client.socket.close()
       })
     })
   }
 
   private _createLobby(): void {
     console.log("Attempting to create lobby...")
-    this.client.createLobby(this.apiRoot + "/new").pipe(
+    this._client.createLobby(this.apiRoot + "/new").pipe(
       switchMap(_lobby => {
-        console.log("[TestApp.onInit] ::: ", _lobby)
-        return this.client.connect(`${this.wsRoot}/lobby/${_lobby.id}`)
+        alert("Welcome to lobby: " + _lobby.id)
+        return this._client.connect(`${this.wsRoot}/lobby/${_lobby.id}`)
       })
     ).subscribe({
       next: _packet => {
