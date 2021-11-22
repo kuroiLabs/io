@@ -15,6 +15,6 @@
     "webpack-cli": "^3.3.12"
   },
   "scripts": {
-    "build": "shx rm -rf ./dist && webpack"
+    "build": "shx rm -rf ./dist && webpack && shx cp src/main.css dist/main.css"
   }
 }
