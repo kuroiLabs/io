@@ -1,15 +1,36 @@
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@kuroi/io Client Test</title>
+  <link rel="stylesheet" href="main.css">
 </head>
+
 <body>
-  <div class="chat-box">
-    <textarea name="user-input" id="user-input"></textarea>
-    <button id="submit-button">Send</button>
-    <button id="new-lobby-button">New Lobby</button>
+  <div id="app">
+    <div id="header">
+      <div id="branding">
+        <h1 id="title"><span class="logo">&#9630;</span> Chat App</h1>
+        <span id="lobby-name"></span>
+      </div>
+      <div id="controls">
+        <button id="new-lobby-button">New Lobby</button>
+      </div>
+    </div>
+    <div id="body">
+      <div id="messages"></div>
+    </div>
+    <div id="footer">
+      <div id="message">
+        <textarea name="message" id="message-input"></textarea>
+      </div>
+      <div id="send">
+        <button id="send-button" name="send-button">Send</button>
+      </div>
+    </div>
   </div>
 </body>
+
 </html>
