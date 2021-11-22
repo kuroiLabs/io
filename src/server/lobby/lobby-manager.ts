@@ -1,23 +1,27 @@
 import { Lobby } from "./lobby"
 import { ILobbyManager } from "./lobby-manager.interface"
 
-export abstract class BaseLobbyManager implements ILobbyManager {
+/**
+ * @classdesc Basic lobby manager class for extension or instantiation
+ */
+export class BaseLobbyManager implements ILobbyManager {
 
-  protected lobbies: Map<int, Lobby>
+  protected lobbies: Map<string, Lobby>
 
   constructor() {
     this.lobbies = new Map()
   }
 
   public addLobby(_lobby: Lobby): void {
+    _lobby.on("destroy", () => this.removeLobby(_lobby.id))
     this.lobbies.set(_lobby.id, _lobby)
   }
 
-  public removeLobby(_lobbyId: int): void {
+  public removeLobby(_lobbyId: string): void {
     this.lobbies.delete(_lobbyId)
   }
 
-  public getLobby(_lobbyId: int): Lobby | null {
+  public getLobby(_lobbyId: string): Lobby | null {
     return this.lobbies.get(_lobbyId) || null
   }
 
