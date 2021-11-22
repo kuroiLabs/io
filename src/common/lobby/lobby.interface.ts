@@ -1,5 +1,5 @@
 export interface ILobby {
-  id: uint32
+  id: string
   name?: string
   maxClients?: byte
 }
