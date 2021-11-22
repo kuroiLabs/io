@@ -14,7 +14,7 @@ export class TestLobby extends Lobby {
   }
 
   public onHandshake(_client: WebSocket, _clientId: byte): void {
-    console.log("[TestLobby.onHandshake] ::: Handshaking client [" + _clientId + "]")
+    console.log("[TestLobby.onHandshake] Handshaking client [" + _clientId + "]")
     // allocate 2 byte buffer for packet
     const _buffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT * 2)
     const _packet = new ServerPacket(_buffer)
@@ -27,7 +27,7 @@ export class TestLobby extends Lobby {
     const _clientId: byte = _packet.readByte()
     const _message: string = _packet.readString()
 
-    console.log(`Received message from client [${_clientId}]: ${_message}`)
+    console.log(`[TestLobby._onMessage] Received message from client [${_clientId}]: ${_message}`)
 
     const _bytes: Uint8Array = this.encoder.encode(_message)
     const _byteLength: int = (Uint8Array.BYTES_PER_ELEMENT * 2) + _bytes.byteLength

@@ -8,7 +8,7 @@ import { Guard } from "../../src/server/rest"
 export class TestGuard extends Guard {
   constructor() {
     super((_req: Request, _res: Response, _next: NextFunction) => {
-      console.log("testGuard:::", "Succesfully ran guard")
+      console.log("[testGuard] Succesfully ran guard")
       if (this.validate(_req)) {
         _next()
       }

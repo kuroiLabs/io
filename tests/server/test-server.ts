@@ -2,8 +2,7 @@ import { Syringe } from "@kuroi/syringe"
 import cors from "cors"
 import express from "express"
 import http from "http"
-import { BaseLobbyManager, Route } from "../../src/server"
-import { BaseServer } from "../../src/server"
+import { BaseLobbyManager, BaseServer, Route } from "../../src/server"
 import { LobbyRoute } from "./lobby-route"
 import { EXPRESS, PORT } from "./test-api-tokens"
 import { TestCorsGuard } from "./test-cors.guard"
@@ -13,7 +12,7 @@ import { TestRoute } from "./test-route"
 @Syringe.Injectable({
   scope: "global"
 })
-export class TestServer extends BaseServer {
+export class TestServer extends BaseServer implements Syringe.OnInit {
   constructor(
     @Syringe.Inject(EXPRESS) api: express.Express,
     @Syringe.Inject(PORT) port: number,
@@ -23,12 +22,15 @@ export class TestServer extends BaseServer {
     @Syringe.Inject(TestLobbyManager) lobbyManager: BaseLobbyManager
   ) {
     super(api, port, [lobbyRoute, testRoute], [corsGuard], lobbyManager)
+  }
+
+  onInit(): void {
     this.api.use(cors())
   }
 
   public start(): void {
     this.httpServer = http.createServer(this.api).listen(this.port, () => {
-      console.log("[TestServer] ::: Successfully started HTTP server on port:" + this.port)
+      console.log("[TestServer] Successfully started HTTP server on port:" + this.port)
       this.enableWebSockets()
     })
   }

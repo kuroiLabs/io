@@ -20,9 +20,8 @@ export class MessageService implements Syringe.OnInit {
   }
 
   public addMessage(_clientId: byte, _message: string): void {
-    if (!this._messageDOMContainer) {
+    if (!this._messageDOMContainer)
       return
-    }
     const _timestamp: Date = new Date()
     const _messageElement: HTMLDivElement = document.createElement("div")
     const _dateString: string = _timestamp.toLocaleDateString()
@@ -30,9 +29,8 @@ export class MessageService implements Syringe.OnInit {
     _messageElement.innerHTML = `<div class="message-meta"><h4>Client ${_clientId}</h4><span>${_dateString} ${_timeString}</span></div>`
     _messageElement.innerHTML += `<div class="message-content">${_message}</div>`
     _messageElement.classList.add("message")
-    if (_clientId !== this._client.id) {
+    if (_clientId !== this._client.id)
       _messageElement.classList.add("incoming")
-    }
     this._messageDOMContainer.appendChild(_messageElement);
   }
 
