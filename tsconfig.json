@@ -9,6 +9,7 @@
     ],
     "outDir": "./lib",
     "removeComments": true,
+    "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
