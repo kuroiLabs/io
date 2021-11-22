@@ -9,6 +9,8 @@ Extend the `BaseServer` class and include your routes and guards in the super ca
 
 ```typescript
 import { BaseServer } from "@kuroi/io/server"
+import cors from "cors"
+import express from "express"
 import http from "http"
 ...
 
@@ -20,7 +22,7 @@ export class MyServer extends BaseServer {
     myGuard: TestCorsGuard,
     lobbyManager?: BaseLobbyManager
   ) {
-    super(api, port, true, [lobbyRoute, testRoute], [corsGuard], lobbyManager)
+    super(api, port, true, [myRoute], [myGuard], lobbyManager)
     // used for most server apps
     this.api.use(cors())
   }
@@ -29,7 +31,7 @@ export class MyServer extends BaseServer {
   // the supplied express instance
   public start(): void {
     this.httpServer = http.createServer(this.api).listen(this.port, () => {
-      // if your application uses WebSockets
+      // if your application uses WebSockets, call this method after startup
       this.enableWebSockets()
     })
   }
@@ -68,9 +70,8 @@ import { Guard } from "@kuroi/io/server"
 export class MyGuard extends Guard {
   constructor() {
     super((req: Request, res: Response, next: NextFunction) => {
-      if (this.validateRequest(req)) {
+      if (this.validateRequest(req))
         next()
-      }
     })
   }
   private validateRequest(req: Request): boolean {

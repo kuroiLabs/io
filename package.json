@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/kuroiLabs/io#readme",
   "dependencies": {
+    "@kuroi/numeric": "^1.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "https-server": "^0.1.2",
@@ -47,5 +48,13 @@
     "http": "0.0.1-security",
     "http-server": "^14.0.0",
     "shx": "^0.3.3"
+  },
+  "peerDependencies": {
+    "@kuroi/numeric": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "https-server": "^0.1.2",
+    "rxjs": "^7.4.0",
+    "ws": "^8.2.3"
   }
 }
