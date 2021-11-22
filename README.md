@@ -197,11 +197,11 @@ Packets must be read in the same order in which they're written, so it's importa
 ```typescript
 function sendMessage(message: string): void {
   // translate message to byte array
-  const bytes: Uint8Array = new TextEncoder().encode(_message)
+  const bytes: Uint8Array = new TextEncoder().encode(message)
   // calculate byteLength of string bytes + packet ID + client ID
   const byteLength: int = bytes.byteLength + (Uint8Array.BYTES_PER_ELEMENT * 2)
   // instantiate a new ArrayBuffer to hold bytes
-  const buffer: ArrayBuffer = new ArrayBuffer(_byteLength)
+  const buffer: ArrayBuffer = new ArrayBuffer(byteLength)
   // create a packet instance around the buffer
   const packet = new ClientPacket(buffer)
   // write data to packet
@@ -209,7 +209,7 @@ function sendMessage(message: string): void {
   packet.writeUInt16(CLIENT_ID)
   packet.writeBytes(bytes)
   // send data through WebClient instance
-  myWebClient.send(_packet)
+  myWebClient.send(packet)
 }
 ```
 
