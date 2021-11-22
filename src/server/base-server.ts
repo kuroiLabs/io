@@ -41,7 +41,7 @@ export abstract class BaseServer {
       if (_url.startsWith("/lobby")) {
         const _lobbyId = _request.url.split('/').pop()
         this.lobbyManager?.getLobbies().forEach(_lobby => {
-          if (_lobbyId && +_lobbyId === _lobby.id)
+          if (_lobbyId && _lobbyId === _lobby.id)
             _lobby.upgrade(_request, _socket, _head)
         })
       }
