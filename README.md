@@ -55,7 +55,7 @@ export class MyRoute extends Route {
   @Get("/leo") // GET */api/example/leo
   public test(_request: Request, _response: Response) {
     _response.json({
-      message: "Hello, it's me, Uncle Leo!"
+      message: "Jerry, hello! It's me, Uncle Leo!"
     })
   }
 }
