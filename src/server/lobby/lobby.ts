@@ -5,23 +5,23 @@ import { ILobby } from "../../common/lobby"
 import { BasePacketHandler } from "../../common/utils"
 import { ServerPacket } from "../net"
 
-export interface Lobby {
-  onClose?(client: WebSocket, id: byte): void
-  onDestroy?(): void
-  onHandshake?(client: WebSocket, id: byte): void
-  onJoin?(client: WebSocket, id: byte): void
-  onLeave?(client: WebSocket, id: byte): void
-}
+type LobbyPacketHandlerCallback = (packet: ServerPacket) => void
 
-type LobbyPacketHandlerCallback = (packet: ServerPacket, clientId: uint16) => void
+export interface Lobby {
+  onClose?(client: WebSocket, ...args: any[]): void
+  onDestroy?(): void
+  onHandshake?(client: WebSocket, ...args: any[]): void
+  onJoin?(client: WebSocket, ...args: any[]): void
+  onLeave?(client: WebSocket, ...args: any[]): void
+}
 
 export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback> implements ILobby {
 
   public static readonly DEFAULT_MAX_CLIENTS: byte = 12
 
-  public clients: Map<uint32, WebSocket>
+  protected clients: Map<uint32, WebSocket>
 
-  public id: uint16
+  public id: string
 
   public name: string
 
@@ -38,7 +38,20 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
     this.maxClients = _lobby && _lobby.maxClients || Lobby.DEFAULT_MAX_CLIENTS
     this.wss = new WebSocket.Server({ noServer: true })
     this.clients = new Map<uint32, WebSocket>()
-    this.connect()
+    this._openConnection()
+  }
+
+  private _openConnection(): void {
+    this.wss.on("connection", this._handshake.bind(this))
+  }
+
+  private _handshake(_client: WebSocket): void {
+    if (this.clients.size >= this.maxClients)
+      return _client.close()
+    const _id: byte = this._generator.generateNumericId()
+    if (this.onHandshake)
+      this.onHandshake(_client, _id)
+    this.add(_id, _client)
   }
 
   public getConfig(): ILobby {
@@ -60,46 +73,15 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
       this.onJoin(_client, _id)
   }
 
-  public connect(): void {
-    this.wss.on("connection", (_client: WebSocket) => {
-      this._handshake(_client)
-    })
-  }
-
-  public upgrade(request: http.IncomingMessage, socket: any, head: any): void {
-    this.wss.handleUpgrade(request, socket, head, (_ws: WebSocket) => {
-      this.wss.emit("connection", _ws, request)
-    })
-  }
-
-  private _handshake(_client: WebSocket): void {
-    if (this.clients.size >= this.maxClients)
-      return _client.close()
-    const _id: byte = this._generator.generateNumericId()
-    if (this.onHandshake)
-      this.onHandshake(_client, _id)
-    this.add(_id, _client)
-  }
-
-  public remove(_clientId: uint32): void {
-    const _client = this.clients.get(_clientId)
-    if (_client) {
-      if (this.onLeave)
-        this.onLeave(_client, _clientId)
-      this.clients.delete(_clientId)
-    }
-  }
-
   private _connectionOpened(_client: WebSocket, _clientId: byte): void {
     if (this.onJoin)
       this.onJoin(_client, _clientId)
   }
 
   private _messageReceived(_data: WebSocket.Data): void {
-    const _packet = new ServerPacket(_data as Buffer)
+    const _packet: ServerPacket = new ServerPacket(_data as Buffer)
     const _packetId: byte = _packet.readByte()
-    const _clientId: byte = _packet.readByte()
-    this.emit(_packetId, _packet, _clientId)
+    this.emit(_packetId, _packet)
   }
 
   private _clientClosed(_clientId: uint32): void {
@@ -108,9 +90,26 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
       _client.removeAllListeners()
       if (this.onClose)
         this.onClose(_client, _clientId)
+      this.clients.delete(_clientId)
     }
     if (!this.clients.size) {
       this.destroy()
+    }
+  }
+
+  public upgrade(request: http.IncomingMessage, socket: any, head: any): void {
+    this.wss.handleUpgrade(request, socket, head, (_ws: WebSocket) =>
+      this.wss.emit("connection", _ws, request)
+    )
+  }
+
+  public remove(_clientId: byte): void {
+    const _client = this.clients.get(_clientId)
+    if (_client) {
+      if (this.onLeave)
+        this.onLeave(_client, _clientId)
+      _client.close()
+      this.clients.delete(_clientId)
     }
   }
 
@@ -123,6 +122,7 @@ export abstract class Lobby extends BasePacketHandler<LobbyPacketHandlerCallback
     this.wss.close()
     if (this.onDestroy)
       this.onDestroy()
+    this.emit("destroy")
   }
 
 }
