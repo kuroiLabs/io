@@ -1,7 +1,8 @@
 import { Syringe } from "@kuroi/syringe"
 import { Observable } from "rxjs"
+import { take } from "rxjs/operators"
+import { IHttpClient, WebClient } from "../../../src/client"
 import { ILobby } from "../../../src/common"
-import { WebClient, IHttpClient } from "../../../src/client"
 import { HTTP } from "./http.token"
 
 @Syringe.Injectable({
@@ -11,7 +12,7 @@ export class TestClient extends WebClient {
 
   constructor(@Syringe.Inject(HTTP) private http: IHttpClient) {
     super()
-    http.get("http://localhost:6969/api/test/leo").subscribe({
+    http.get("http://localhost:6969/api/test/leo").pipe(take(1)).subscribe({
       next: res => console.log(res)
     })
   }
