@@ -13,7 +13,7 @@ export interface WebClient {
 }
 
 export class WebClient extends BasePacketHandler {
-  
+
   public id: byte | uint16 | uint32 | undefined
 
   public socket: WebSocket | undefined
@@ -26,6 +26,12 @@ export class WebClient extends BasePacketHandler {
 
   private _stream: Observable<ClientPacket> | undefined
 
+  private _socketOpenHandler!: Function
+
+  private _socketErrorHandler!: Function
+
+  private _socketMessageHandler!: Function
+
   get stream$(): Observable<ClientPacket> {
     if (!this._stream) {
       this._stream = this._startStream().pipe(shareReplay(1))
@@ -37,6 +43,8 @@ export class WebClient extends BasePacketHandler {
     try {
       if (this.beforeConnect)
         this.beforeConnect()
+      if (this.socket)
+        this.disconnect()
       this.socket = this._createSocket(_url)
       return this.stream$
     } catch (_err) {
@@ -44,6 +52,16 @@ export class WebClient extends BasePacketHandler {
         this.onError(_err)
       return throwError(() => _err)
     }
+  }
+
+  public disconnect(): void {
+    if (this.socket) {
+      this.socket.removeEventListener("open", this._socketOpenHandler.bind(this))
+      this.socket.removeEventListener("error", this._socketErrorHandler.bind(this))
+      this.socket.removeEventListener("message", this._socketMessageHandler.bind(this))
+      this.socket = undefined
+    }
+    this._stream = undefined
   }
 
   public send(_packet: ClientPacket): void {
@@ -65,13 +83,10 @@ export class WebClient extends BasePacketHandler {
 
     if (this.beforeDisconnect)
       this.beforeDisconnect()
-    
+
     this.socket?.close()
     this.state = WebSocket.CLOSED
 
-    if (this._stream)
-      this._stream
-    
     if (this.onDisconnect)
       this.onDisconnect()
   }
@@ -91,21 +106,26 @@ export class WebClient extends BasePacketHandler {
   }
 
   private _handleConnectionStream(_socket: WebSocket, _observer: Subscriber<ClientPacket>): void {
-    _socket.addEventListener("open", () => {
+    const _messageHandler = (_event: any) => _observer.next(new ClientPacket(_event.data))
+    const _connectionHandler = () => {
       if (this.onConnect)
         this.onConnect()
       this.state = WebSocket.OPEN
-      this.socket?.addEventListener("message", event =>
-        _observer.next(new ClientPacket(event.data))
-      )
-    })
+      _socket.addEventListener("message", _messageHandler)
+    }
+    _socket.addEventListener("open", _connectionHandler)
+    this._socketOpenHandler = _connectionHandler
+    this._socketMessageHandler = _messageHandler
   }
 
   private _handleConnectionErrors(_socket: WebSocket, _observer: Subscriber<ClientPacket>): void {
-    _socket.addEventListener("error", _error => {
+    const _handler = (_context: WebSocket, _error: Event) => {
       if (this.onError)
         this.onError(_error)
-    })
+      console.error(new Error("kuroi.io.client.WebClient encountered error during packet stream"))
+    }
+    _socket.addEventListener("error", _handler.bind(this, _socket))
+    this._socketErrorHandler = _handler
   }
 
   private _createSocket(_url: string): WebSocket {
