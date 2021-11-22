@@ -1,54 +1,51 @@
-import express from 'express'
-import { Guard } from '../guard'
-import { ILobby, Lobby } from '../lobby'
-import { Route } from '../route'
+import express from "express"
+import http from "http"
+import https from "https"
+import { BaseLobbyManager } from "./lobby"
+import { Guard, Route } from "./rest"
 
 export abstract class BaseServer {
 
-  public routes: Route[] = []
-
-  public guards: Guard[] = []
-
-  public lobbies: ILobby[] = []
+  protected httpServer?: http.Server | https.Server
 
   constructor(
     public api: express.Express,
-    public port: number
+    public port: number,
+    public routes: Route[] = [],
+    public guards: Guard[] = [],
+    private lobbyManager?: BaseLobbyManager
   ) {
-
+    this._configureGuards()
+    this._configureRoutes()
   }
 
-  public addLobby(_lobby: ILobby): Lobby {
-    const _newLobby: Lobby = new Lobby(_lobby)
-    this.lobbies.push(_newLobby)
-    return _newLobby
+  private _configureRoutes(): void {
+    for (let i = 0; i < this.routes.length; i++)
+      this.api.use(this.routes[i].path, this.routes[i].router)
   }
 
-  public removeLobby(_lobbyId: uint16): void {
-    const _lobbyIndex: int = this.lobbies.findIndex(_lobby =>
-      _lobby.id === _lobbyId
-    )
-    if (_lobbyIndex > -1)
-      this.lobbies.splice(_lobbyIndex, 1)
+  private _configureGuards(): void {
+    for (let i = 0; i < this.guards.length; i++)
+      this.api.use(this.guards[i].handler)
   }
 
-  public onInit(): void {
-    this.configureGuards()
-    this.configureRoutes()
-  }
+  public abstract start(): void
 
-  private configureRoutes(): void {
-    if (this.routes)
-      for (const route of this.routes)
-        this.api.use(route.path, route.router)
-  }
-
-  private configureGuards(): void {
-    if (this.guards) {
-      for (const _guard of this.guards)
-        if (_guard && _guard.handler)
-          this.api.use(_guard.handler)
-    }
+  protected enableWebSockets(): void {
+    if (!this.httpServer || !this.lobbyManager)
+      return
+    this.httpServer.on("upgrade", (_request: http.IncomingMessage, _socket: any, _head: any) => {
+      if (!_request.url)
+        return
+      const _url: string = _request.url.substring(_request.url.indexOf('/'), _request.url.length)
+      if (_url.startsWith("/lobby")) {
+        const _lobbyId = _request.url.split('/').pop()
+        this.lobbyManager?.getLobbies().forEach(_lobby => {
+          if (_lobbyId && _lobbyId === _lobby.id)
+            _lobby.upgrade(_request, _socket, _head)
+        })
+      }
+    })
   }
 
 }

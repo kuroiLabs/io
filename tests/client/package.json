@@ -1,0 +1,20 @@
+{
+  "name": "@kuroi/io-client-test",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "dependencies": {
+    "@kuroi/syringe": "^1.0.4",
+    "rxjs": "^7.4.0"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^4.4.0",
+    "ts-loader": "^8.3.0",
+    "typescript": "^4.4.4",
+    "webpack": "4.42.1",
+    "webpack-cli": "^3.3.12"
+  },
+  "scripts": {
+    "build": "shx rm -rf ./dist && webpack && shx cp src/main.css dist/main.css"
+  }
+}

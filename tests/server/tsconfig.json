@@ -7,14 +7,11 @@
     "typeRoots": [
       "node_modules/@kuroi/numeric/types"
     ],
-    "outDir": "./lib",
+    "outDir": "dist",
     "removeComments": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
-  },
-  "exclude": [
-    "tests/**/*"
-  ]
+  }
 }
