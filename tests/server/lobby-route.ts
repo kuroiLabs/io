@@ -1,5 +1,4 @@
 import { GeneratorService } from "@kuroi/numeric/generate"
-import { isUInt16 } from "@kuroi/numeric/typing"
 import { Syringe } from "@kuroi/syringe"
 import { Request, Response } from "express"
 import { BaseLobbyManager, Delete, Post, Route } from "../../src/server"
@@ -22,7 +21,7 @@ export class LobbyRoute extends Route {
     try {
       const _lobby = new TestLobby({
         name: "My Lobby",
-        id: this._generator.generateNumericId(),
+        id: this._generator.randomString(),
         maxClients: 2
       })
       this.lobbyManager.addLobby(_lobby)
@@ -35,8 +34,8 @@ export class LobbyRoute extends Route {
 
   @Delete("/:lobbyId")
   public endLobby(_request: Request, _response: Response): void {
-    const _lobbyId: uint16 = +_request.params.lobbyId
-    if (!isUInt16(_lobbyId)) {
+    const _lobbyId: string = _request.params.lobbyId
+    if (!_lobbyId) {
       _response.status(400).json(new Error("Invalid lobby ID: " + _lobbyId))
       return
     }
