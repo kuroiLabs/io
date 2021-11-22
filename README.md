@@ -195,7 +195,7 @@ The real-time communication stack leverages a wrapping interface around the bina
 Packets must be read in the same order in which they're written, so it's important to be careful and consistent about how you write packets. You'll also need to be aware of how many bytes your packet will need to hold, which may require byte padding in some cases.
 
 ```typescript
-function sendMessage(message: string): ClientPacket {
+function sendMessage(message: string): void {
   // translate message to byte array
   const bytes: Uint8Array = new TextEncoder().encode(_message)
   // calculate byteLength of string bytes + packet ID + client ID
