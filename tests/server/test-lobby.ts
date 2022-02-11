@@ -1,5 +1,6 @@
 import WebSocket from "ws"
 import { ILobby } from "../../src/common/lobby"
+import { ReservedPackets } from "../../src/common/net"
 import { Lobby, ServerPacket } from "../../src/server"
 import { PACKETS } from "../common/packets.enum"
 
@@ -19,8 +20,17 @@ export class TestLobby extends Lobby {
     const _buffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT * 2)
     const _packet = new ServerPacket(_buffer)
     // write two bytes to packet: packet id and the client's new id
-    _packet.writeBytes([PACKETS.WELCOME, _clientId])
+    _packet.writeBytes([ReservedPackets.WELCOME, _clientId])
     _client.send(_packet.data())
+	// call example RPC too, why not
+	const _rpcCall = this.encoder.encode(JSON.stringify({
+		api: "TestApp.exampleRpc",
+		arguments: ["Server RPC Message!"]
+	}));
+	const _rpcBuffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT + _rpcCall.byteLength);
+	const _rpcPacket = new ServerPacket(_rpcBuffer);
+	_rpcPacket.writeBytes([ReservedPackets.RPC, ..._rpcCall]);
+	_client.send(_rpcPacket.data())
   }
 
   private _onMessage(_packet: ServerPacket): void {
