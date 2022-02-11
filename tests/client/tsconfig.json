@@ -1,18 +1,18 @@
 {
-  "compilerOptions": {
-    "target": "es2015",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "sourceMap": true,
-    "module": "commonjs",
-    "typeRoots": [
-      "node_modules/@kuroi/numeric/types"
-    ],
-    "outDir": "dist",
-    "removeComments": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true
-  }
+	"compilerOptions": {
+		"target": "es2015",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"sourceMap": true,
+		"module": "commonjs",
+		"typeRoots": [
+			"../../node_modules/@kuroi/numeric/types"
+		],
+		"outDir": "dist",
+		"removeComments": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true
+	}
 }
