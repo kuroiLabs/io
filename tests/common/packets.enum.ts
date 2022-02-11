@@ -1,4 +1,3 @@
 export enum PACKETS {
-  WELCOME,
-  MESSAGE
+  MESSAGE = 2
 }
