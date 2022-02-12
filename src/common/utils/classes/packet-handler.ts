@@ -1,4 +1,4 @@
-import { IPacket } from "../net/packet.interface"
+import { IPacket } from "../../net"
 
 export type PacketHandlerCallback = (..._args: any[]) => void
 
