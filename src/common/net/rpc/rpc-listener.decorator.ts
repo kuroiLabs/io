@@ -1,25 +1,26 @@
-import { Constructor } from "../../utils";
+import { takeUntil } from "rxjs/operators";
+import { Constructor, Destroyable } from "../../utils";
 import { IPacket } from "../packet.interface";
 import { ReservedPackets } from "../reserved-packet.enum";
 import { IRpcCall } from "./rpc-call.interface";
-import { RPC_HANDLER } from "./rpc-handler";
+import { RPC_HANDLER_STORE } from "./rpc-handler-store";
 import { RpcMethods } from "./rpc-methods.symbol";
 
-export function RpcListener<T extends Constructor>(Target: T) {
+export function RpcListener<T extends Constructor<Destroyable>>(Target: T) {
 	class RpcListenerExtension extends Target {
 		constructor(...args: any[]) {
 			super(...args);
 			const _rpcMethods: string[] = Target.prototype[RpcMethods] || [];
-			_rpcMethods.forEach(_method => {
-				RPC_HANDLER.get().subscribe(_handler => {
+			RPC_HANDLER_STORE.get().pipe(takeUntil(this.destroyed$)).subscribe(_handler => {
+				_rpcMethods.forEach(_method => {
 					_handler.on(ReservedPackets.RPC, (_packet: IPacket<any>) => {
 						try {
 							const _rpcCallJson: string = _packet.readString();
 							const _rpcCall: IRpcCall = JSON.parse(_rpcCallJson);
 							if (_rpcCall && _rpcCall.api !== _rpcCall.api)
 								return
-
-							this[_method](...(_rpcCall.arguments || []))
+	
+							(this as any)[_method](...(_rpcCall.arguments || []))
 						} catch (_err) {
 							console.error(_err)
 						}
