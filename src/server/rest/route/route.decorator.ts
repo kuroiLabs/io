@@ -7,7 +7,7 @@ export function Route<T extends Constructor<BaseRoute>>(Class: T) {
 	class DecoratedRoute extends Class {
 		constructor(...args: any[]) {
 			super(...args);
-			const _endpoints: Endpoint[] = (this as any)[__ENDPOINTS];
+			const _endpoints: Endpoint[] = Class.prototype[__ENDPOINTS];
 			if (_endpoints) {
 				this._configureEndpoints(_endpoints);
 			}
