@@ -12,6 +12,9 @@ export function RpcListener(className?: string) {
 			constructor(...args: any[]) {
 				super(...args)
 				const _rpcMethods: string[] = Target.prototype[RpcMethods] || [];
+				if (!_rpcMethods || !_rpcMethods.length)
+					return;
+				
 				RPC_HANDLER_STORE.get().pipe(takeUntil(this.destroyed$)).subscribe(_handler => {
 					_rpcMethods.forEach(_method => {
 						_handler.on(ReservedPackets.RPC, (_packet: IPacket<any>) => {
@@ -19,7 +22,7 @@ export function RpcListener(className?: string) {
 								const _apiName: string = `${className || Target.name}.${_method}`;
 								const _rpcCallJson: string = _packet.readString()
 								const _rpcCall: IRpcCall = JSON.parse(_rpcCallJson)
-								if (_rpcCall && _rpcCall.api !== _apiName)
+								if (!_rpcCall || _rpcCall.api !== _apiName)
 									return
 		
 								(this as any)[_method](...(_rpcCall.arguments || []))
