@@ -1,6 +1,8 @@
-import { RpcMethods } from "./rpc-methods.symbol";
+import { RpcMethods } from "./rpc-methods.symbol"
 
-export function Rpc(target: any, propertyKey: string) {
-	target[RpcMethods] = target[RpcMethods] || [];
-	target[RpcMethods].push(propertyKey);
+export function Rpc(methodName?: string) {
+	return function _rpcDecorator(target: any, propertyKey: string) {
+		target[RpcMethods] = target[RpcMethods] || []
+		target[RpcMethods].push(methodName || propertyKey)
+	}
 }
