@@ -1,7 +1,7 @@
 import { Syringe } from "@kuroi/syringe"
 import { switchMap } from "rxjs/operators"
 import { ClientPacket } from "../../../src/client/net"
-import { ReservedPackets, Rpc, RpcListener } from "../../../src/common"
+import { Destroyable, ReservedPackets, Rpc, RpcListener } from "../../../src/common"
 import { PACKETS } from "../../common/packets.enum"
 import { MessageService } from "./message.service"
 import { TestClient } from "./test-client"
@@ -9,8 +9,8 @@ import { TestClient } from "./test-client"
 @Syringe.Injectable({
 	scope: "global"
 })
-@RpcListener
-export class TestApp implements Syringe.OnInit {
+@RpcListener("TestApp")
+export class TestApp extends Destroyable implements Syringe.OnInit {
 
 	private root: string = `localhost:6969`
 
@@ -29,7 +29,7 @@ export class TestApp implements Syringe.OnInit {
 		@Syringe.Inject(MessageService)
 		private _messages: MessageService
 	) {
-
+		super();
 	}
 
 	onInit(): void {
@@ -38,9 +38,7 @@ export class TestApp implements Syringe.OnInit {
 		if (_lobbyId) {
 			const _url: string = `${this.wsRoot}/lobby/${_lobbyId}`
 			this._client.connect(_url).subscribe({
-				next: _packet => {
-					this._emitPacket(_packet)
-				}
+				next: _packet => this._emitPacket(_packet)
 			})
 		}
 
@@ -124,7 +122,7 @@ export class TestApp implements Syringe.OnInit {
 		})
 	}
 
-	@Rpc
+	@Rpc("exampleRpc")
 	public exampleRpc(_message: string): void {
 		console.log("[RPC][TestApp.exampleRpc]", _message);
 	}

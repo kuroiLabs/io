@@ -2,7 +2,7 @@ import { Syringe } from "@kuroi/syringe"
 import cors from "cors"
 import express from "express"
 import http from "http"
-import { BaseLobbyManager, BaseServer, Route } from "../../src/server"
+import { BaseLobbyManager, BaseServer } from "../../src/server"
 import { LobbyRoute } from "./lobby-route"
 import { EXPRESS, PORT } from "./test-api-tokens"
 import { TestCorsGuard } from "./test-cors.guard"
@@ -17,7 +17,7 @@ export class TestServer extends BaseServer implements Syringe.OnInit {
     @Syringe.Inject(EXPRESS) api: express.Express,
     @Syringe.Inject(PORT) port: number,
     @Syringe.Inject(LobbyRoute) lobbyRoute: LobbyRoute,
-    @Syringe.Inject(TestRoute) testRoute: Route,
+    @Syringe.Inject(TestRoute) testRoute: TestRoute,
     @Syringe.Inject(TestCorsGuard) corsGuard: TestCorsGuard,
     @Syringe.Inject(TestLobbyManager) lobbyManager: BaseLobbyManager
   ) {
