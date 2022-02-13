@@ -11,14 +11,11 @@ export class Endpoint implements IEndpoint {
 
   public guards: IEndpoint[] = []
 
-  public _route?: { _endpoints: IEndpoint[] }
-
   constructor(_endpoint: IEndpoint) {
     this.path = _endpoint.path || ''
     this.method = _endpoint.method || 'get'
     this.handler = _endpoint.handler
     this.guards = _endpoint.guards || []
-    this._route = _endpoint._route
   }
 
 }
