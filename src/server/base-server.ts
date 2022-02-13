@@ -2,7 +2,7 @@ import express from "express"
 import http from "http"
 import https from "https"
 import { BaseLobbyManager } from "./lobby"
-import { Guard, Route } from "./rest"
+import { Guard, BaseRoute } from "./rest"
 
 export abstract class BaseServer {
 
@@ -11,7 +11,7 @@ export abstract class BaseServer {
   constructor(
     public api: express.Express,
     public port: number,
-    public routes: Route[] = [],
+    public routes: BaseRoute[] = [],
     public guards: Guard[] = [],
     private lobbyManager?: BaseLobbyManager
   ) {
