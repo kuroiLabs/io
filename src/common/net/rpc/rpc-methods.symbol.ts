@@ -1,1 +1,1 @@
-export const RpcMethods = Symbol("RpcMethods");
+export const RpcMethods = Symbol("RpcMethods")

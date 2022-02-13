@@ -1,5 +1,5 @@
 export interface IRpcCall {
-	api: string;
-	id?: string;
+	api: string
+	id?: string
 	arguments?: any[]
 }

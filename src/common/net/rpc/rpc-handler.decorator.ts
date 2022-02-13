@@ -1,5 +1,5 @@
-import { BasePacketHandler, Constructor } from "../../utils";
-import { RPC_HANDLER_STORE } from "./rpc-handler-store";
+import { BasePacketHandler, Constructor } from "../../utils"
+import { RPC_HANDLER_STORE } from "./rpc-handler-store"
 
 export function RpcHandler<T extends Constructor>(Target: T) {
 	class RpcHandlerExtension extends Target {
