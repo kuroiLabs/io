@@ -1,4 +1,3 @@
-import { Endpoint } from "../endpoint"
 import { Guard } from "../../guard"
 import { endpointDecorator } from "./endpoint.decorator"
 
