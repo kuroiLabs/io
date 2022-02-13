@@ -3,19 +3,19 @@ import { IEndpoint } from "./endpoint.interface"
 
 export class Endpoint implements IEndpoint {
 
-  public path: string
+	public path: string
 
-  public method: string
+	public method: string
 
-  public handler: RequestHandler
+	public handler: RequestHandler
 
-  public guards: IEndpoint[] = []
+	public guards: IEndpoint[] = []
 
-  constructor(_endpoint: IEndpoint) {
-    this.path = _endpoint.path || ''
-    this.method = _endpoint.method || 'get'
-    this.handler = _endpoint.handler
-    this.guards = _endpoint.guards || []
-  }
+	constructor(_endpoint: IEndpoint) {
+		this.path = _endpoint.path || ''
+		this.method = _endpoint.method || 'get'
+		this.handler = _endpoint.handler
+		this.guards = _endpoint.guards || []
+	}
 
 }
