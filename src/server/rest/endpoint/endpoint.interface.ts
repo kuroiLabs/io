@@ -1,6 +1,4 @@
 import { RequestHandler } from "express";
-import { Constructor } from "../../../common";
-import { BaseRoute } from "../route";
 
 export interface IStaticRoute {
   _endpoints: IEndpoint[]
@@ -15,5 +13,4 @@ export interface IEndpoint {
   handler: RequestHandler
   /** Optional guards that must pass before allowing the handler to run */
   guards?: IEndpoint[]
-  _route?: Constructor<BaseRoute>
 }
