@@ -1,15 +1,13 @@
-import { BasePacketHandler, Constructor } from "../../utils"
-import { RPC_HANDLER_STORE } from "./rpc-handler-store"
+import { Constructor } from "../../utils"
+import { IRpcHandler } from "./rpc-handler.interface"
+import { RpcHandlerInstance } from "./rpc-handler-store"
 
-export function RpcHandler<T extends Constructor>(Target: T) {
-	class RpcHandlerExtension extends Target {
-		constructor(...args: any[]) {
-			super(...args)
-			RPC_HANDLER_STORE.set(<any>this as BasePacketHandler)
+export function RpcHandler<T extends Constructor<IRpcHandler>>(Class: T) {
+	return new Proxy(Class, {
+		construct(_class: T, _args: any[]) {
+			const _instance: IRpcHandler = Reflect.construct(_class, _args)
+			RpcHandlerInstance.set(_instance)
+			return _instance
 		}
-	}
-	Object.defineProperty(RpcHandlerExtension, "name", {
-		value: Target.name
 	})
-	return RpcHandlerExtension
 }
