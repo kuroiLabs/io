@@ -1,4 +1,4 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import { switchMap } from "rxjs/operators"
 import { ClientPacket } from "../../../src/client/net"
 import { Destroyable, ReservedPackets, Rpc, RpcListener } from "../../../src/common"

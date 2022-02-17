@@ -1,5 +1,5 @@
 import { GeneratorService } from "@kuroi/numeric/generate"
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import { Request, Response } from "express"
 import { BaseLobbyManager, Delete, Post, BaseRoute, Route } from "../../src/server"
 import { TestLobby } from "./test-lobby"

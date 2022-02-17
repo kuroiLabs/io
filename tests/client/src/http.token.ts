@@ -1,4 +1,4 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import { HttpClient } from "../../../src/client/http"
 
 const http = new HttpClient()

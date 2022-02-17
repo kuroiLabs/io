@@ -1,4 +1,4 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import { TestClient } from "./test-client"
 
 @Syringe.Injectable({

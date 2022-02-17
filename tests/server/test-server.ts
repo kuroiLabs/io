@@ -1,4 +1,4 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import cors from "cors"
 import express from "express"
 import http from "http"

@@ -1,4 +1,4 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import { TestServer } from "./test-server"
 
 const testApp: TestServer = Syringe.inject(TestServer)
