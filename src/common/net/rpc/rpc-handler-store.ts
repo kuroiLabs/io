@@ -1,17 +1,12 @@
 import { Observable, ReplaySubject } from "rxjs"
-import { BasePacketHandler } from "../../utils"
-import { IRpcHandlerStore } from "./rpc-handler-store.interface"
+import { IRpcHandler } from "./rpc-handler.interface"
 
-export const RPC_HANDLER_STORE: IRpcHandlerStore = (() => {
-
-	let _handler = new ReplaySubject<BasePacketHandler>()
-
-	return {
-		get(): Observable<BasePacketHandler> {
-			return _handler
-		},
-		set(_instance: BasePacketHandler): void {
-			_handler.next(_instance)
-		}
+export namespace RpcHandlerInstance {
+	const _handler = new ReplaySubject<IRpcHandler>()
+	export function get(): Observable<IRpcHandler> {
+		return _handler
 	}
-})()
+	export function set(_instance: IRpcHandler): void {
+		_handler.next(_instance)
+	}
+}
