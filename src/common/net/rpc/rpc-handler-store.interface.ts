@@ -1,7 +1,7 @@
 import { Observable } from "rxjs"
-import { BasePacketHandler } from "../../utils"
+import { IRpcHandler } from "./rpc-handler.interface"
 
 export interface IRpcHandlerStore {
-	get(): Observable<BasePacketHandler>
-	set(handler: BasePacketHandler): void
+	get(): Observable<IRpcHandler>
+	set(handler: IRpcHandler): void
 }
