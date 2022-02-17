@@ -5,5 +5,5 @@ export * from "./rpc-handler.decorator"
 export * from "./rpc-handler.interface"
 export * from "./rpc-listener.decorator"
 export * from "./rpc-methods.symbol"
+export * from "./rpc-response.interface"
 export * from "./rpc.decorator"
-
