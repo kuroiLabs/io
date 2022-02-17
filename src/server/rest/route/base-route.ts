@@ -20,7 +20,7 @@ export abstract class BaseRoute implements IRoute {
 		this.guards = guards || []
 	}
 
-	protected _configureEndpoints(_endpoints: IEndpoint[]): void {
+	public _configureEndpoints(_endpoints: IEndpoint[]): void {
 		for (const _endpoint of _endpoints) {
 			// front load guards/middleware
 			const _handlers: express.RequestHandler[] = this.guards && this.guards.map(_guard =>
