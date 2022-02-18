@@ -1,6 +1,6 @@
-import { BaseSerializationEvent, Deserializable, IPacket, ISerializable } from "../../src/common"
+import { BaseSerializationEvent, Serializable, IPacket, ISerializable } from "../../src/common"
 
-@Deserializable
+@Serializable
 export class ChatMessage implements ISerializable {
 
 	constructor(public id: byte, public message: string) {
