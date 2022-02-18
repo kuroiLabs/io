@@ -1,1 +1,1 @@
-export const __ENDPOINTS = Symbol("__ENDPOINTS");
+export const __ENDPOINTS = Symbol("__ENDPOINTS")
