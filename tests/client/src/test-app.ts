@@ -1,8 +1,8 @@
 import * as Syringe from "@kuroi/syringe"
 import { switchMap } from "rxjs/operators"
-import { ClientPacket } from "../../../src/client/net"
+import { ClientPacket, ClientSerializationEvent } from "../../../src/client/net"
 import { Destroyable, ReservedPackets, Rpc, RpcListener } from "../../../src/common"
-import { PACKETS } from "../../common/packets.enum"
+import { PACKETS, ChatMessage } from "../../common"
 import { MessageService } from "./message.service"
 import { TestClient } from "./test-client"
 
@@ -60,21 +60,16 @@ export class TestApp extends Destroyable implements Syringe.OnInit {
 	}
 
 	private _onMessage(_packet: ClientPacket): void {
-		const _clientId: byte = _packet.readByte()
-		const _message: string = _packet.readString()
-		this._messages.addMessage(_clientId, _message)
+		const _chatMessage = ChatMessage.deserialize(_packet)
+		this._messages.addMessage(_chatMessage)
 	}
 
 	public sendMessage(_message: string): void {
-		const _bytes: Uint8Array = this._client.encoder.encode(_message)
-		const _byteLength: int = _bytes.byteLength + (Uint8Array.BYTES_PER_ELEMENT * 2)
-		const _buffer: ArrayBuffer = new ArrayBuffer(_byteLength)
-		const _packet = new ClientPacket(_buffer)
-		_packet.writeByte(PACKETS.MESSAGE)
-		_packet.writeByte(this._client.id as byte)
-		_packet.writeBytes(_bytes)
-		this._client.send(_packet)
-		this._messages.addMessage(this._client.id as number, _message)
+		const _chatMessage = new ChatMessage(<byte>this._client.id, _message)
+		const _serializationEvent = new ClientSerializationEvent(PACKETS.MESSAGE, this._client.encoder)
+		_chatMessage.serialize(_serializationEvent)
+		this._client.send(_serializationEvent.getPacket())
+		this._messages.addMessage(_chatMessage)
 	}
 
 	private _setUpListeners(): void {
