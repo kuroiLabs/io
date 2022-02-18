@@ -9,6 +9,8 @@ Extend the `BaseServer` class and include your routes and guards in the super ca
 
 ```typescript
 import { BaseServer } from "@kuroi/io/server"
+import cors from "cors"
+import express from "express"
 import http from "http"
 ...
 
@@ -20,7 +22,7 @@ export class MyServer extends BaseServer {
     myGuard: TestCorsGuard,
     lobbyManager?: BaseLobbyManager
   ) {
-    super(api, port, true, [lobbyRoute, testRoute], [corsGuard], lobbyManager)
+    super(api, port, true, [myRoute], [myGuard], lobbyManager)
     // used for most server apps
     this.api.use(cors())
   }
@@ -29,7 +31,7 @@ export class MyServer extends BaseServer {
   // the supplied express instance
   public start(): void {
     this.httpServer = http.createServer(this.api).listen(this.port, () => {
-      // if your application uses WebSockets
+      // if your application uses WebSockets, call this method after startup
       this.enableWebSockets()
     })
   }
@@ -47,13 +49,20 @@ import { Route, Get } from "@kuroi/io/server"
 
 export class MyRoute extends Route {
   constructor() {
-    super("example", MyRoute) // */api/example
+    super("example") // */api/example
   }
 
   @Get("/leo") // GET */api/example/leo
   public test(_request: Request, _response: Response) {
     _response.json({
-      message: "Hello, it's me, Uncle Leo!"
+      message: "Jerry, hello! It's me, Uncle Leo!"
+    })
+  }
+
+  @Post("/george") // POST */api/example/george
+  public test(_request: Request, _response: Response) {
+    _response.json({
+      message: "Jerry, hello! It's me, Uncle Leo!"
     })
   }
 }
@@ -68,9 +77,8 @@ import { Guard } from "@kuroi/io/server"
 export class MyGuard extends Guard {
   constructor() {
     super((req: Request, res: Response, next: NextFunction) => {
-      if (this.validateRequest(req)) {
+      if (this.validateRequest(req))
         next()
-      }
     })
   }
   private validateRequest(req: Request): boolean {
@@ -194,13 +202,15 @@ The real-time communication stack leverages a wrapping interface around the bina
 Packets must be read in the same order in which they're written, so it's important to be careful and consistent about how you write packets. You'll also need to be aware of how many bytes your packet will need to hold, which may require byte padding in some cases.
 
 ```typescript
-function sendMessage(message: string): ClientPacket {
+function sendMessage(message: string): void {
   // translate message to byte array
-  const bytes: Uint8Array = new TextEncoder().encode(_message)
+  const bytes: Uint8Array = new TextEncoder().encode(message)
   // calculate byteLength of string bytes + packet ID + client ID
-  const byteLength: int = bytes.byteLength + (Uint8Array.BYTES_PER_ELEMENT * 2)
+  const byteLength: int = Uint8Array.BYTES_PER_ELEMENT
+    + Uint16Array.BYTES_PER_ELEMENT
+    + bytes.byteLength
   // instantiate a new ArrayBuffer to hold bytes
-  const buffer: ArrayBuffer = new ArrayBuffer(_byteLength)
+  const buffer: ArrayBuffer = new ArrayBuffer(byteLength)
   // create a packet instance around the buffer
   const packet = new ClientPacket(buffer)
   // write data to packet
@@ -208,7 +218,7 @@ function sendMessage(message: string): ClientPacket {
   packet.writeUInt16(CLIENT_ID)
   packet.writeBytes(bytes)
   // send data through WebClient instance
-  myWebClient.send(_packet)
+  myWebClient.send(packet)
 }
 ```
 
@@ -228,3 +238,53 @@ function deserializeChatMessage(packet: ServerPacket): ChatMessage {
   return new ChatMessage(clientId, message)
 }
 ```
+
+## RPCs
+`@kuroi/io` exposes a powerful and flexible RPC system to allow your applications to respond to remote procedural calls by name.
+
+To use RPCs, you'll need three decorators:
+ - `@RpcHandler`
+ - `@RpcListner`
+ - `@Rpc`
+
+### `@RpcHandler`
+You'll need a singleton class that implements `IRpcHandler` to be instantiated in your application, and decorate it with `@RpcHandler`.
+```typescript
+@RpcHandler
+class MyRpcHandler implements IRpcHandler {
+  ...
+}
+```
+
+### `@RpcListener`
+Write classes to wrap your RPC methods and decorate them with `@RpcListener`. Your class *must* extend `Destroyable`. This decorator takes an optional argument for a class name. If your JavaScript bundler alters your class name, you may want to supply this string, otherwise you can leave it blank.
+```typescript
+import { Destroyable } from "@kuroi/io/common"
+@RpcListener("API")
+class MyCustomAPI extends Destroyable { }
+```
+
+### `@Rpc`
+Decorate methods inside an `@RpcListener` class with an optional method name alias.
+```typescript
+@RpcListener("API")
+class MyCustomAPI extends Destroyable {
+  @Rpc
+  sayHello(name: string) {
+    console.log("Hello " + name)
+  }
+}
+```
+
+### Invoking RPCs
+To invoke an RPC, simply pass a `IRpcCall` object to the RPC Handler `invoke` method. Your application can listen on sockets or REST APIs for RPC calls and redirect them to the RPC Handler.
+```typescript
+<MyRpcHandler>myRpcHandler.invoke({
+  api: "API.sayHello",
+  id: "xxx",
+  arguments: ["kuro"]
+})
+// output: "Hello kuro"
+```
+
+Each invocation is given a unique string ID (supplied by the caller). If the RPC method returns a value, your RPC handler's `invoke` implementation should send the return value back to the caller with the same ID in the `IRpcResponse`.

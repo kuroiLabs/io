@@ -4,4 +4,5 @@ export interface IHttpOptions {
   headers?: {
     [header: string]: any
   }
+  [property: string]: any
 }

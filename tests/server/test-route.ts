@@ -1,12 +1,13 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import { Request, Response } from "express"
-import { Get, Route } from "../../src/server/rest"
+import { Get, BaseRoute, Route } from "../../src/server/rest"
 import { TestGuard } from "./test-guard"
 
 @Syringe.Injectable()
-export class TestRoute extends Route {
+@Route
+export class TestRoute extends BaseRoute {
   constructor() {
-    super('test', TestRoute)
+    super("test")
   }
 
   @Get("/leo", [Syringe.inject(TestGuard)])

@@ -39,12 +39,13 @@ export class WebClient extends BasePacketHandler {
     return this._stream
   }
 
+  /* Unsubscribe to disconnect */
   public connect(_url: string): Observable<ClientPacket> {
     try {
       if (this.beforeConnect)
         this.beforeConnect()
       if (this.socket)
-        this.disconnect()
+        this._disconnect()
       this.socket = this._createSocket(_url)
       return this.stream$
     } catch (_err) {
@@ -52,16 +53,6 @@ export class WebClient extends BasePacketHandler {
         this.onError(_err)
       return throwError(() => _err)
     }
-  }
-
-  public disconnect(): void {
-    if (this.socket) {
-      this.socket.removeEventListener("open", this._socketOpenHandler.bind(this))
-      this.socket.removeEventListener("error", this._socketErrorHandler.bind(this))
-      this.socket.removeEventListener("message", this._socketMessageHandler.bind(this))
-      this.socket = undefined
-    }
-    this._stream = undefined
   }
 
   public send(_packet: ClientPacket): void {
@@ -77,18 +68,10 @@ export class WebClient extends BasePacketHandler {
     this.socket.send(_packet.data())
   }
 
-  private _disconnect(): void {
-    if (this.state === WebSocket.CLOSED)
-      return
-
-    if (this.beforeDisconnect)
-      this.beforeDisconnect()
-
-    this.socket?.close()
-    this.state = WebSocket.CLOSED
-
-    if (this.onDisconnect)
-      this.onDisconnect()
+  private _createSocket(_url: string): WebSocket {
+    const _socket = new WebSocket(_url)
+    _socket.binaryType = "arraybuffer"
+    return _socket
   }
 
   private _startStream(): Observable<ClientPacket> {
@@ -128,10 +111,29 @@ export class WebClient extends BasePacketHandler {
     this._socketErrorHandler = _handler
   }
 
-  private _createSocket(_url: string): WebSocket {
-    const _socket = new WebSocket(_url)
-    _socket.binaryType = "arraybuffer"
-    return _socket
+  private _disconnect(): void {
+    if (this.state === WebSocket.CLOSED)
+      return
+
+    if (this.beforeDisconnect)
+      this.beforeDisconnect()
+
+    this.socket?.close()
+    this.state = WebSocket.CLOSED
+    this._resetSocket()
+
+    if (this.onDisconnect)
+      this.onDisconnect()
+  }
+
+  private _resetSocket(): void {
+    if (this.socket) {
+      this.socket.removeEventListener("open", this._socketOpenHandler.bind(this))
+      this.socket.removeEventListener("error", this._socketErrorHandler.bind(this))
+      this.socket.removeEventListener("message", this._socketMessageHandler.bind(this))
+      this.socket = undefined
+    }
+    this._stream = undefined
   }
 
 }
