@@ -1,4 +1,5 @@
 import { RequestHandler } from "express"
+import { IHandler } from "../handler"
 import { IEndpoint } from "./endpoint.interface"
 
 export class Endpoint implements IEndpoint {
@@ -9,7 +10,7 @@ export class Endpoint implements IEndpoint {
 
 	public handler: RequestHandler
 
-	public guards: IEndpoint[] = []
+	public guards: IHandler[] = []
 
 	constructor(_endpoint: IEndpoint) {
 		this.path = _endpoint.path || ''
