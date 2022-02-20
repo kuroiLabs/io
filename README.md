@@ -139,6 +139,7 @@ export class ExampleLobby extends Lobby {
 Wherever your application receives requests to create new lobbies, construct your lobby and add it to your `BaseLobbyManager` instance.
 
 ```typescript
+@Route
 export class MyLobbyRoute {
   ...
   @Post("/new")
@@ -216,7 +217,7 @@ function sendMessage(message: string): void {
   const packet = new ClientPacket(buffer)
   // write data to packet
   packet.writeByte(PACKET_ID)
-  packet.writeUInt16(CLIENT_ID)
+  packet.writeByte(CLIENT_ID)
   packet.writeBytes(bytes)
   // send data through WebClient instance
   myWebClient.send(packet)
@@ -234,9 +235,39 @@ class ChatMessage {
 }
 
 function deserializeChatMessage(packet: ServerPacket): ChatMessage {
-  const clientId: number = packet.readUint16()
+  const clientId: number = packet.readByte()
   const message: string = packet.readString()
   return new ChatMessage(clientId, message)
+}
+```
+
+### Serialization Events
+To make serializing data structures more efficient, consider using `@Serializable` classes to group your data. This decorator will request that you implement the `ISerializable` interface and that your class statically fulfills the `IDeserializable` interfaces as well. Basically, you need a `serialize` instance method, and a static `deserialize` method.
+
+```typescript
+@Serializable
+class ChatMessage implements ISerializable {
+
+  constructor(public clientId: number, public message: string) {
+  
+  }
+  
+  // read the ChatMessage instance from a packet
+  // it's up to you to call this at the right time/index
+  public static deserialize(packet: IPacket<any>): ChatMessage {
+    public static deserialize(_packet: IPacket<any>): ChatMessage {
+		const _clientId: byte = _packet.readByte()
+		const _message: string = _packet.readString()
+		return new ChatMessage(_clientId, _message)
+	}
+
+  // add your bytes to the serialization event without
+  // calculating total byte length ahead of time
+	public serialize(event: BaseSerializationEvent<any>): void {
+		event.addByteGroup(new Uint8Array([this.id]))
+		event.addByteGroup(event.encoder.encode(this.message))
+  }
+
 }
 ```
 
@@ -249,7 +280,7 @@ To use RPCs, you'll need three decorators:
  - `@Rpc`
 
 ### `@RpcHandler`
-You'll need a singleton class that implements `IRpcHandler` to be instantiated in your application, and decorate it with `@RpcHandler`.
+You'll need a singleton class that implements `IRpcHandler` to be instantiated in your application, and decorate it with `@RpcHandler`. This class needs to set up the logic to actually listen for RPC calls -- only you know where your application expects these. It may be over Sockets, or it may be over `postMessage` API, etc.
 ```typescript
 @RpcHandler
 class MyRpcHandler implements IRpcHandler {
@@ -262,7 +293,9 @@ Write classes to wrap your RPC methods and decorate them with `@RpcListener`. Yo
 ```typescript
 import { Destroyable } from "@kuroi/io/common"
 @RpcListener("API")
-class MyCustomAPI extends Destroyable { }
+class MyCustomAPI extends Destroyable {
+
+}
 ```
 
 ### `@Rpc`
@@ -270,7 +303,7 @@ Decorate methods inside an `@RpcListener` class with an optional method name ali
 ```typescript
 @RpcListener("API")
 class MyCustomAPI extends Destroyable {
-  @Rpc
+  @Rpc("sayHello")
   sayHello(name: string) {
     console.log("Hello " + name)
   }
