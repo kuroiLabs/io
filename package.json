@@ -1,60 +1,68 @@
 {
-  "name": "@kuroi/io",
-  "version": "0.0.1",
-  "description": "Node.js Typescript framework for server-side applications",
-  "main": "index.js",
-  "scripts": {
-    "build": "shx rm -rf lib && tsc",
-    "build:test:client": "cd tests/client && npm run build",
-    "build:test:server": "cd tests/server && npm run build",
-    "test:client:e2e": "npm run build:test:client && http-server tests/client/dist",
-    "test:server:e2e": "npm run build:test:server && node tests/server/dist/tests/server/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kuroiLabs/io.git"
-  },
-  "keywords": [
-    "io",
-    "node",
-    "typescript",
-    "express",
-    "api",
-    "rest",
-    "ws",
-    "websocket",
-    "realtime"
-  ],
-  "author": "kuro <kuro@kuroi.io>",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/kuroiLabs/io/issues"
-  },
-  "homepage": "https://github.com/kuroiLabs/io#readme",
-  "dependencies": {
-    "@kuroi/numeric": "^1.0.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "https-server": "^0.1.2",
-    "rxjs": "^7.4.0",
-    "ws": "^8.2.3"
-  },
-  "devDependencies": {
-    "@kuroi/syringe": "^1.0.4",
-    "@types/cors": "^2.8.12",
-    "@types/express": "^4.17.13",
-    "@types/node": "^16.11.6",
-    "@types/ws": "^8.2.0",
-    "http": "0.0.1-security",
-    "http-server": "^14.0.0",
-    "shx": "^0.3.3"
-  },
-  "peerDependencies": {
-    "@kuroi/numeric": "^1.0.0",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "https-server": "^0.1.2",
-    "rxjs": "^7.4.0",
-    "ws": "^8.2.3"
-  }
+	"name": "@kuroi/io",
+	"version": "0.0.2",
+	"description": "Node.js Typescript framework for server-side applications",
+	"main": "index.js",
+	"scripts": {
+		"prebuild": "shx rm -rf lib",
+		"build": "tsc",
+		"postbuild": "shx cp package.json lib/package.json",
+		"build:test:client": "cd tests/client && npm run build",
+		"build:test:server": "cd tests/server && npm run build",
+		"test:client:e2e": "npm run build:test:client && http-server tests/client/dist",
+		"test:server:e2e": "npm run build:test:server && node tests/server/dist/tests/server/index.js",
+		"start:publish": "npm publish ./lib --access=public --scope=@kuroi",
+		"test:publish": "npm publish ./lib --access=public --scope=@kuroi --dry-run"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kuroiLabs/io.git"
+	},
+	"keywords": [
+		"io",
+		"node",
+		"typescript",
+		"express",
+		"api",
+		"rest",
+		"ws",
+		"websocket",
+		"realtime"
+	],
+	"author": "kuro <kuro@kuroi.io>",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/kuroiLabs/io/issues"
+	},
+	"homepage": "https://github.com/kuroiLabs/io#readme",
+	"dependencies": {
+		"@kuroi/numeric": "^1.0.0",
+		"cors": "^2.8.5",
+		"express": "^4.17.1",
+		"https-server": "^0.1.2",
+		"rxjs": "^7.4.0",
+		"ws": "^8.2.3"
+	},
+	"devDependencies": {
+		"@kuroi/syringe": "^2.0.0",
+		"@types/cors": "^2.8.12",
+		"@types/express": "^4.17.13",
+		"@types/node": "^16.11.6",
+		"@types/ws": "^8.2.0",
+		"html-webpack-plugin": "^5.5.0",
+		"http": "0.0.1-security",
+		"http-server": "^14.0.0",
+		"shx": "^0.3.3",
+		"ts-loader": "^9.2.6",
+		"webpack": "^5.68.0",
+		"webpack-cli": "^4.9.2"
+	},
+	"peerDependencies": {
+		"@kuroi/numeric": "^1.0.0",
+		"cors": "^2.8.5",
+		"express": "^4.17.1",
+		"https-server": "^0.1.2",
+		"rxjs": "^7.4.0",
+		"ws": "^8.2.3"
+	}
 }

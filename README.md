@@ -42,17 +42,25 @@ export class MyServer extends BaseServer {
 ### Adding API routes and endpoints
 As illustrated above, routes should be supplied to your server's `super` call as class instances.
 
-Decorate your route class's methods with `@Get`, `@Post`, `@Put`, etc. to create endpoints on the route.
+Add a `@Route` decorator to your class your route and decorate its methods with `@Get`, `@Post`, `@Put`, etc. to create endpoints on the route.
 
 ```typescript
 import { Route, Get } from "@kuroi/io/server"
 
+@Route
 export class MyRoute extends Route {
   constructor() {
-    super("example", MyRoute) // */api/example
+    super("example") // */api/example
   }
 
   @Get("/leo") // GET */api/example/leo
+  public test(_request: Request, _response: Response) {
+    _response.json({
+      message: "Jerry, hello! It's me, Uncle Leo!"
+    })
+  }
+
+  @Post("/george") // POST */api/example/george
   public test(_request: Request, _response: Response) {
     _response.json({
       message: "Jerry, hello! It's me, Uncle Leo!"
@@ -67,7 +75,7 @@ export class MyRoute extends Route {
 ```typescript
 import { Guard } from "@kuroi/io/server"
 
-export class MyGuard extends Guard {
+export class MyGuard {
   constructor() {
     super((req: Request, res: Response, next: NextFunction) => {
       if (this.validateRequest(req))
@@ -231,3 +239,53 @@ function deserializeChatMessage(packet: ServerPacket): ChatMessage {
   return new ChatMessage(clientId, message)
 }
 ```
+
+## RPCs
+`@kuroi/io` exposes a powerful and flexible RPC system to allow your applications to respond to remote procedural calls by name.
+
+To use RPCs, you'll need three decorators:
+ - `@RpcHandler`
+ - `@RpcListner`
+ - `@Rpc`
+
+### `@RpcHandler`
+You'll need a singleton class that implements `IRpcHandler` to be instantiated in your application, and decorate it with `@RpcHandler`.
+```typescript
+@RpcHandler
+class MyRpcHandler implements IRpcHandler {
+  ...
+}
+```
+
+### `@RpcListener`
+Write classes to wrap your RPC methods and decorate them with `@RpcListener`. Your class *must* extend `Destroyable`. This decorator takes an optional argument for a class name. If your JavaScript bundler alters your class name, you may want to supply this string, otherwise you can leave it blank.
+```typescript
+import { Destroyable } from "@kuroi/io/common"
+@RpcListener("API")
+class MyCustomAPI extends Destroyable { }
+```
+
+### `@Rpc`
+Decorate methods inside an `@RpcListener` class with an optional method name alias.
+```typescript
+@RpcListener("API")
+class MyCustomAPI extends Destroyable {
+  @Rpc
+  sayHello(name: string) {
+    console.log("Hello " + name)
+  }
+}
+```
+
+### Invoking RPCs
+To invoke an RPC, simply pass a `IRpcCall` object to the RPC Handler `invoke` method. Your application can listen on sockets or REST APIs for RPC calls and redirect them to the RPC Handler.
+```typescript
+<MyRpcHandler>myRpcHandler.invoke({
+  api: "API.sayHello",
+  id: "xxx",
+  arguments: ["kuro"]
+})
+// output: "Hello kuro"
+```
+
+Each invocation is given a unique string ID (supplied by the caller). If the RPC method returns a value, your RPC handler's `invoke` implementation should send the return value back to the caller with the same ID in the `IRpcResponse`.

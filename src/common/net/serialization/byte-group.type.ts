@@ -1,0 +1,1 @@
+export type ByteGroup = Array<Uint8Array | byte[]>

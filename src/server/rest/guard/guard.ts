@@ -1,12 +1,8 @@
 import { RequestHandler } from "express"
-import { Endpoint } from "../endpoint"
+import { IHandler } from "../handler"
 
-export abstract class Guard extends Endpoint {
-  constructor(handler: RequestHandler) {
-    super({
-      path: '',
-      method: '',
-      handler
-    })
+export abstract class Guard implements IHandler {
+  constructor(public handler: RequestHandler) {
+	  
   }
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/main.js",
   "dependencies": {
-    "@kuroi/syringe": "^1.0.4",
+    "@kuroi/syringe": "^2.0.0",
     "rxjs": "^7.4.0"
   },
   "devDependencies": {

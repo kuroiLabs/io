@@ -1,4 +1,4 @@
-import { Syringe } from "@kuroi/syringe"
+import * as Syringe from "@kuroi/syringe"
 import express from "express"
 
 export const EXPRESS = new Syringe.InjectionToken("Express", {
