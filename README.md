@@ -42,11 +42,12 @@ export class MyServer extends BaseServer {
 ### Adding API routes and endpoints
 As illustrated above, routes should be supplied to your server's `super` call as class instances.
 
-Decorate your route class's methods with `@Get`, `@Post`, `@Put`, etc. to create endpoints on the route.
+Add a `@Route` decorator to your class your route and decorate its methods with `@Get`, `@Post`, `@Put`, etc. to create endpoints on the route.
 
 ```typescript
 import { Route, Get } from "@kuroi/io/server"
 
+@Route
 export class MyRoute extends Route {
   constructor() {
     super("example") // */api/example
@@ -74,7 +75,7 @@ export class MyRoute extends Route {
 ```typescript
 import { Guard } from "@kuroi/io/server"
 
-export class MyGuard extends Guard {
+export class MyGuard {
   constructor() {
     super((req: Request, res: Response, next: NextFunction) => {
       if (this.validateRequest(req))
