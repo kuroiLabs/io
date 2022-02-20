@@ -15,26 +15,26 @@ import http from "http"
 ...
 
 export class MyServer extends BaseServer {
-  constructor(
-    api: express.Express,
-    port: number,
-    myRoute: MyRoute,
-    myGuard: TestCorsGuard,
-    lobbyManager?: BaseLobbyManager
-  ) {
-    super(api, port, true, [myRoute], [myGuard], lobbyManager)
-    // used for most server apps
-    this.api.use(cors())
-  }
-
-  // implement the abstract start method and spin up an HTTP/HTTPS server from
-  // the supplied express instance
-  public start(): void {
-    this.httpServer = http.createServer(this.api).listen(this.port, () => {
-      // if your application uses WebSockets, call this method after startup
-      this.enableWebSockets()
-    })
-  }
+	constructor(
+		api: express.Express,
+		port: number,
+		myRoute: MyRoute,
+		myGuard: TestCorsGuard,
+		lobbyManager?: BaseLobbyManager
+	) {
+		super(api, port, true, [myRoute], [myGuard], lobbyManager)
+		// used for most server apps
+		this.api.use(cors())
+	}
+	
+	// implement the abstract start method and spin up an HTTP/HTTPS server from
+	// the supplied express instance
+	public start(): void {
+		this.httpServer = http.createServer(this.api).listen(this.port, () => {
+			// if your application uses WebSockets, call this method after startup
+			this.enableWebSockets()
+		})
+ 	}
 
 }
 ```
@@ -42,30 +42,30 @@ export class MyServer extends BaseServer {
 ### Adding API routes and endpoints
 As illustrated above, routes should be supplied to your server's `super` call as class instances.
 
-Add a `@Route` decorator to your class your route and decorate its methods with `@Get`, `@Post`, `@Put`, etc. to create endpoints on the route.
+Add a `@Route` decorator to your class extending `BaseRoute` and decorate its methods with `@Get`, `@Post`, `@Put`, etc. to create endpoints on the route.
 
 ```typescript
-import { Route, Get } from "@kuroi/io/server"
+import { BaseRoute, Route, Get, Post } from "@kuroi/io/server"
 
 @Route
-export class MyRoute extends Route {
-  constructor() {
-    super("example") // */api/example
-  }
-
-  @Get("/leo") // GET */api/example/leo
-  public test(_request: Request, _response: Response) {
-    _response.json({
-      message: "Jerry, hello! It's me, Uncle Leo!"
-    })
-  }
-
-  @Post("/george") // POST */api/example/george
-  public test(_request: Request, _response: Response) {
-    _response.json({
-      message: "Jerry, hello! It's me, Uncle Leo!"
-    })
-  }
+export class MyRoute extends BaseRoute {
+	constructor() {
+		super("example") // */api/example
+	}
+	
+	@Get("/leo") // GET */api/example/leo
+	public test(_request: Request, _response: Response) {
+		_response.json({
+			message: "Jerry, hello! It's me, Uncle Leo!"
+		})
+	}
+	
+	@Post("/george") // POST */api/example/george
+	public test(_request: Request, _response: Response) {
+		_response.json({
+			message: "George is gettin' upset!"
+		})
+	}
 }
 ```
 
@@ -76,15 +76,25 @@ export class MyRoute extends Route {
 import { Guard } from "@kuroi/io/server"
 
 export class MyGuard {
-  constructor() {
-    super((req: Request, res: Response, next: NextFunction) => {
-      if (this.validateRequest(req))
-        next()
-    })
-  }
-  private validateRequest(req: Request): boolean {
-    ...
-  }
+	constructor() {
+		super((req: Request, res: Response, next: NextFunction) => {
+			if (this.validateRequest(req))
+				next()
+		})
+	}
+	private validateRequest(req: Request): boolean {
+		...
+	}
+}
+
+...
+
+@Route
+export class SomeRoute {
+	@Get("/guarded", [ MyGuard ])
+	public guardedEndpoint(req: Request, res: Response) {
+		...
+	}
 }
 ```
 
@@ -102,36 +112,36 @@ import { Lobby } from "@kuroi/io/server"
 
 // shared enum between server and client
 enum PACKETS {
-  WELCOME,
-  MESSAGE
+	WELCOME,
+	MESSAGE
 }
 
 export class ExampleLobby extends Lobby {
 
-  constructor(_lobby: ILobby) {
-    super(_lobby)
-    // register listeners by packet ID
-    this.on(PACKETS.MESSAGE, this._onMessage.bind(this))
-  }
-
-  public onHandshake(_client: WebSocket, _clientId: number): void {
-    // handshake/security logic and exit conditions
-    ...
-    // typically on handshake, you would send the assigned ID back to client
-    const _buffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT * 2)
-    const _packet = new ServerPacket(_buffer)
-    _packet.writeBytes([PACKETS.WELCOME, _clientId])
-    _client.send(_packet.data())
-  }
-
-  private _onMessage(_packet: ServerPacket, _clientId: byte): void {
-    const _message: string = _packet.readString()
-    console.log(`Received message from client [${_clientId}]: ${_message}`)
-    this.clients.forEach((_client, _id) => {
-      if (_id !== _clientId)
-        // relay message to other clients
-    })
-  }
+	constructor(_lobby: ILobby) {
+  		super(_lobby)
+		// register listeners by packet ID
+		this.on(PACKETS.MESSAGE, this._onMessage.bind(this))
+  	}
+	
+	public onHandshake(_client: WebSocket, _clientId: number): void {
+  		// handshake/security logic and exit conditions
+		...
+		// typically on handshake, you would send the assigned ID back to client
+		const _buffer = Buffer.alloc(Uint8Array.BYTES_PER_ELEMENT * 2)
+		const _packet = new ServerPacket(_buffer)
+		_packet.writeBytes([PACKETS.WELCOME, _clientId])
+		_client.send(_packet.data())
+  	}
+  	
+	private _onMessage(_packet: ServerPacket, _clientId: byte): void {
+  		const _message: string = _packet.readString()
+		console.log(`Received message from client [${_clientId}]: ${_message}`)
+		this.clients.forEach((_client, _id) => {
+			if (_id !== _clientId)
+				// relay message to other clients
+		})
+	}
 
 }
 ```
@@ -141,17 +151,17 @@ Wherever your application receives requests to create new lobbies, construct you
 ```typescript
 @Route
 export class MyLobbyRoute {
-  ...
-  @Post("/new")
-  public newLobby(_request: Request, _response: Response) {
-    const _lobby = new TestLobby({
-      name: "My Lobby",
-      id: generateId(), // ID generation implementation is up to you
-      maxClients: 2
-    })
-    this.lobbyManager.addLobby(_lobby)
-    _response.status(200).json(_lobby.getConfig())
-  }
+	...
+	@Post("/new")
+	public newLobby(_request: Request, _response: Response) {
+		const _lobby = new TestLobby({
+			name: "My Lobby",
+			id: generateId(), // ID generation implementation is up to you
+			maxClients: 2
+		})
+		this.lobbyManager.addLobby(_lobby)
+		_response.status(200).json(_lobby.getConfig())
+	}
 }
 ```
 
@@ -166,7 +176,7 @@ import { HttpClient } from "@kuroi/io/client"
 
 const http = new HttpClient()
 http.get("/api/resource").subscribe({
-  next: data => {...}
+	next: data => {...}
 })
 ```
 
@@ -178,22 +188,23 @@ import { WebClient } from "@kuroi/io/client"
 import { ILobby } from "@kuroi/io/common"
 
 export class MyWebClient extends WebClient {
-  constuctor(private http: HttpClient) {
-    super()
-    // set up custom logic
-    this.on(SOME_PACKET_ID, this._someListener.bind(this))
-  }
-  private _someListener(...): void {
-    ...
-  }
-  // additional client-side implementation logic in your extension
-  public createLobby(): void {
-    this.http.post<ILobby>(NEW_LOBBY_URL, null).subscribe({
-      next: lobby => {
-        console.log("Successfully created new lobby:", lobby)
-      }
-    })
-  }
+	constuctor(private http: HttpClient) {
+		super()
+		this.on(SOME_PACKET_ID, this._someListener.bind(this))
+	}
+	
+	private _someListener(...): void {
+    	...
+	}
+
+	// additional client-side implementation logic in your extension
+	public createLobby(): void {
+		this.http.post<ILobby>(NEW_LOBBY_URL, null).subscribe({
+			next: lobby => {
+				console.log("Successfully created new lobby:", lobby)
+			}
+		})
+	}
 }
 ```
 
@@ -204,23 +215,23 @@ The real-time communication stack leverages a wrapping interface around the bina
 Packets must be read in the same order in which they're written, so it's important to be careful and consistent about how you write packets. You'll also need to be aware of how many bytes your packet will need to hold, which may require byte padding in some cases.
 
 ```typescript
-function sendMessage(message: string): void {
-  // translate message to byte array
-  const bytes: Uint8Array = new TextEncoder().encode(message)
-  // calculate byteLength of string bytes + packet ID + client ID
-  const byteLength: int = Uint8Array.BYTES_PER_ELEMENT
-    + Uint16Array.BYTES_PER_ELEMENT
-    + bytes.byteLength
-  // instantiate a new ArrayBuffer to hold bytes
-  const buffer: ArrayBuffer = new ArrayBuffer(byteLength)
-  // create a packet instance around the buffer
-  const packet = new ClientPacket(buffer)
-  // write data to packet
-  packet.writeByte(PACKET_ID)
-  packet.writeByte(CLIENT_ID)
-  packet.writeBytes(bytes)
-  // send data through WebClient instance
-  myWebClient.send(packet)
+sendMessage(message: string): void {
+ 	// translate message to byte array
+ 	const bytes: Uint8Array = new TextEncoder().encode(message)
+ 	// calculate byteLength of string bytes + packet ID + client ID
+ 	const byteLength: int = Uint8Array.BYTES_PER_ELEMENT
+		+ Uint16Array.BYTES_PER_ELEMENT
+		+ bytes.byteLength
+ 	// instantiate a new ArrayBuffer to hold bytes
+ 	const buffer: ArrayBuffer = new ArrayBuffer(byteLength)
+ 	// create a packet instance around the buffer
+ 	const packet = new ClientPacket(buffer)
+ 	// write data to packet
+ 	packet.writeByte(PACKET_ID)
+ 	packet.writeByte(CLIENT_ID)
+ 	packet.writeBytes(bytes)
+ 	// send data through WebClient instance
+ 	myWebClient.send(packet)
 }
 ```
 
@@ -231,43 +242,62 @@ Read each set of bytes from the packet in order:
 
 ```typescript
 class ChatMessage {
-  constructor(public clientId: number, public message: string) {}
+	constructor(public clientId: number, public message: string) {}
 }
 
-function deserializeChatMessage(packet: ServerPacket): ChatMessage {
-  const clientId: number = packet.readByte()
-  const message: string = packet.readString()
-  return new ChatMessage(clientId, message)
+deserializeChatMessage(packet: ServerPacket): ChatMessage {
+	const clientId: number = packet.readByte()
+	const message: string = packet.readString()
+	return new ChatMessage(clientId, message)
 }
 ```
 
 ### Serialization Events
 To make serializing data structures more efficient, consider using `@Serializable` classes to group your data. This decorator will request that you implement the `ISerializable` interface and that your class statically fulfills the `IDeserializable` interfaces as well. Basically, you need a `serialize` instance method, and a static `deserialize` method.
 
+Write to an outgoing `BaseSerializationEvent` by adding a `Uint8Array` for each block of data you want to send in the packet -- usually one block per object property, etc. You might also want to pack in array lengths as well. Alternatively, you could implement simpler serialization strategies around `JSON.stringify` and `JSON.parse` in these methods.
+
 ```typescript
+// shared class between client/server
 @Serializable
 class ChatMessage implements ISerializable {
-
-  constructor(public clientId: number, public message: string) {
-  
-  }
-  
-  // read the ChatMessage instance from a packet
-  // it's up to you to call this at the right time/index
-  public static deserialize(packet: IPacket<any>): ChatMessage {
-    public static deserialize(_packet: IPacket<any>): ChatMessage {
-		const _clientId: byte = _packet.readByte()
-		const _message: string = _packet.readString()
-		return new ChatMessage(_clientId, _message)
+	constructor(public clientId: number, public message: string) {}
+	
+	// read the ChatMessage instance from a packet
+	// it's up to you to call this at the right time/index
+	public static deserialize(packet: IPacket<any>): ChatMessage {
+		const clientId: number = packet.readByte()
+		const message: string = packet.readString()
+		return new ChatMessage(clientId, message)
+	}
+	
+	// add your bytes to the serialization event without
+	// calculating total byte length ahead of time
+	public serialize(event: BaseSerializationEvent<any>): void {
+		// write client ID to outgoing event
+		event.addByteGroup(new Uint8Array([this.clientId]))
+		// write message as Uint8Array to outgoing event
+		event.addByteGroup(event.encoder.encode(this.message))
 	}
 
-  // add your bytes to the serialization event without
-  // calculating total byte length ahead of time
-	public serialize(event: BaseSerializationEvent<any>): void {
-		event.addByteGroup(new Uint8Array([this.id]))
-		event.addByteGroup(event.encoder.encode(this.message))
-  }
+}
+```
+Use your `@Serializable` class in your send/receive logic:
+```typescript
+// client code
+sendMessage(message: string): void {
+	const chatMessage = new ChatMessage(myClientId, message)
+	const serializationEvent = new ClientSerializationEvent(PACKETS.MESSAGE)
+	chatMessage.serialize(serializationEvent)
+	MyWebClientInstance.send(serializationEvent.getPacket())
+}
 
+// server code
+onReceiveMessage(packet: ServerPacket) {
+	// read message from packet
+	// assumes any packet header info (ID, etc) has already been read out by this point
+	const message: ChatMessage = ChatMessage.deserialize(packet)
+	// do something with the message
 }
 ```
 
@@ -284,7 +314,7 @@ You'll need a singleton class that implements `IRpcHandler` to be instantiated i
 ```typescript
 @RpcHandler
 class MyRpcHandler implements IRpcHandler {
-  ...
+	...
 }
 ```
 
@@ -292,6 +322,7 @@ class MyRpcHandler implements IRpcHandler {
 Write classes to wrap your RPC methods and decorate them with `@RpcListener`. Your class *must* extend `Destroyable`. This decorator takes an optional argument for a class name. If your JavaScript bundler alters your class name, you may want to supply this string, otherwise you can leave it blank.
 ```typescript
 import { Destroyable } from "@kuroi/io/common"
+
 @RpcListener("API")
 class MyCustomAPI extends Destroyable {
 
@@ -303,10 +334,10 @@ Decorate methods inside an `@RpcListener` class with an optional method name ali
 ```typescript
 @RpcListener("API")
 class MyCustomAPI extends Destroyable {
-  @Rpc("sayHello")
-  sayHello(name: string) {
-    console.log("Hello " + name)
-  }
+	@Rpc("sayHello")
+	sayHello(name: string) {
+		console.log("Hello " + name)
+	}
 }
 ```
 
@@ -314,9 +345,9 @@ class MyCustomAPI extends Destroyable {
 To invoke an RPC, simply pass a `IRpcCall` object to the RPC Handler `invoke` method. Your application can listen on sockets or REST APIs for RPC calls and redirect them to the RPC Handler.
 ```typescript
 <MyRpcHandler>myRpcHandler.invoke({
-  api: "API.sayHello",
-  id: "xxx",
-  arguments: ["kuro"]
+	api: "API.sayHello",
+	id: "xxx",
+	arguments: ["kuro"]
 })
 // output: "Hello kuro"
 ```
