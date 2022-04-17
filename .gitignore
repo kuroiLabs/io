@@ -80,3 +80,6 @@ package-lock.json
 lib/
 tests/client/dist/
 tests/server/dist/
+
+# OS
+*.DS_STORE
